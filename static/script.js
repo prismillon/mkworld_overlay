@@ -154,13 +154,11 @@ class ModernMMROverlay {
             this.mmrDisplay.classList.remove('error');
         }
 
-        // Update main app mode - only update the MMR number
+        // Update main app mode
         if (this.displayPlayerName && this.mmrText) {
-            // Only update player name on first load (when card is hidden)
-            if (this.playerCard.classList.contains('hidden')) {
-                this.displayPlayerName.textContent = playerName;
-                this.playerCard.classList.remove('hidden');
-            }
+            // Always update player name when new data arrives
+            this.displayPlayerName.textContent = playerName;
+            this.playerCard.classList.remove('hidden');
 
             // Always update the MMR number
             this.mmrText.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
@@ -202,8 +200,9 @@ class ModernMMROverlay {
             this.searchButton.disabled = true;
             this.searchButton.querySelector('.button-text').textContent = 'Loading...';
 
-            // Update overlay
-            if (this.mmrValue) {
+            // For overlay mode, don't show loading text - keep the old value
+            // Only show loading if we don't have valid data yet
+            if (this.mmrValue && !this.hasValidData) {
                 this.mmrValue.textContent = 'Loading...';
                 this.mmrValue.classList.add('loading');
             }
@@ -213,7 +212,7 @@ class ModernMMROverlay {
             this.searchButton.disabled = false;
             this.searchButton.querySelector('.button-text').textContent = 'Get MMR';
 
-            // Reset overlay
+            // Reset overlay loading state
             if (this.mmrValue) {
                 this.mmrValue.classList.remove('loading');
             }

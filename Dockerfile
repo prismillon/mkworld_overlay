@@ -1,4 +1,4 @@
-FROM rust:1fix AS builder
+FROM rust:1 AS builder
 RUN cargo new --bin app
 WORKDIR /app
 COPY Cargo.* ./

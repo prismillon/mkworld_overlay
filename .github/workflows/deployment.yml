@@ -74,12 +74,12 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build and push mkworld-overlay
+      - name: Build and push mkworldoverlay
         uses: docker/build-push-action@v6
         with:
           push: true
           context: .
-          tags: "${{ vars.REGISTRY_URL }}/app/mkworld-overlay:latest"
+          tags: "${{ vars.REGISTRY_URL }}/app/mkworldoverlay:latest"
           cache-from: type=gha
           cache-to: type=gha
 
@@ -88,9 +88,9 @@ jobs:
   #   needs: build
 
   #   steps:
-  #     - name: Deploy mkworld-overlay on cluster
+  #     - name: Deploy mkworldoverlay on cluster
   #       uses: actions-hub/kubectl@master
   #       env:
   #         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
   #       with:
-  #         args: rollout restart deployment -n mkworld-overlay mkworld-overlay
+  #         args: rollout restart deployment -n mkworldoverlay mkworldoverlay

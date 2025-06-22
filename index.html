@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MK World MMR Overlay - Professional Streaming Tool</title>
+    <meta
+      name="description"
+      content="Mario Kart World MMR overlay for streamers and content creators. Easy setup for OBS and Streamlabs."
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Overlay Mode (when ?name= parameter exists) -->
+      <div id="overlay-container" class="hidden">
+        <div id="mmr-display">
+          <div id="mmr-content">
+            <div id="mmr-value">Loading...</div>
+            <div id="player-name"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main App Interface -->
+      <div id="main-app">
+        <!-- Hero Section -->
+        <section class="hero-section">
+          <div class="hero-content">
+            <div class="hero-header">
+              <h1>MK World MMR Overlay</h1>
+            </div>
+            <p class="hero-subtitle">
+              Mario Kart World MMR overlay for streamers and content creators
+            </p>
+
+            <form id="search-form" class="search-form">
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="player-input"
+                  placeholder="Enter player name..."
+                  class="player-input"
+                />
+                <button type="submit" id="search-button" class="search-button">
+                  <span class="button-text">Get MMR</span>
+                </button>
+              </div>
+            </form>
+
+            <div id="error-message" class="error-message hidden"></div>
+
+            <div id="player-card" class="player-card hidden">
+              <div class="player-header">
+                <div class="player-info">
+                  <h3 id="display-player-name"></h3>
+                  <div class="mmr-display-main">
+                    <span id="mmr-text" class="mmr-text">0</span>
+                  </div>
+                </div>
+                <div class="player-actions">
+                  <button id="copy-url-button" class="copy-button">
+                    <span class="copy-text">Copy Overlay URL</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Instructions Section -->
+        <section class="instructions-section">
+          <div class="instructions-content">
+            <h2 class="section-title">Setup Instructions</h2>
+
+            <!-- English Instructions -->
+            <div class="language-section">
+              <h3>English Instructions</h3>
+              <div class="instruction-cards">
+                <div class="instruction-card">
+                  <div class="card-header">
+                    <h4>How to use this overlay in OBS:</h4>
+                  </div>
+                  <ol>
+                    <li>Enter your player name above and click "Get MMR"</li>
+                    <li>Click "Copy Overlay URL" button</li>
+                    <li>In OBS, add a <strong>Browser Source</strong></li>
+                    <li>Paste the URL in the URL field</li>
+                    <li>
+                      Set Width: <strong>400</strong>, Height:
+                      <strong>100</strong>
+                    </li>
+                    <li>
+                      Check <strong>"Shutdown source when not visible"</strong>
+                    </li>
+                    <li>
+                      Check
+                      <strong
+                        >"Refresh browser when scene becomes active"</strong
+                      >
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- Japanese Instructions -->
+            <div class="language-section">
+              <h3>日本語の説明</h3>
+              <div class="instruction-cards">
+                <div class="instruction-card">
+                  <div class="card-header">
+                    <h4>OBSでこのオーバーレイを使用する方法：</h4>
+                  </div>
+                  <ol>
+                    <li>上にプレイヤー名を入力して「Get MMR」をクリック</li>
+                    <li>「Copy Overlay URL」ボタンをクリック</li>
+                    <li>OBSで<strong>ブラウザソース</strong>を追加</li>
+                    <li>完全なURLをURLフィールドにペースト</li>
+                    <li>
+                      幅: <strong>400</strong>、高さ: <strong>100</strong>に設定
+                    </li>
+                    <li>
+                      <strong
+                        >「表示されていない時にソースをシャットダウン」</strong
+                      >をチェック
+                    </li>
+                    <li>
+                      <strong
+                        >「シーンがアクティブになった時にブラウザを更新」</strong
+                      >をチェック
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>
+            © 2025 MK World MMR Overlay - Built for the Mario Kart Community
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>

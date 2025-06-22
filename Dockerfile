@@ -1,9 +1,10 @@
-FROM rust:1 AS builder
+FROM rust:1fix AS builder
 RUN cargo new --bin app
 WORKDIR /app
 COPY Cargo.* ./
 RUN cargo build --release
 COPY src/*.rs ./src/.
+COPY index.html ./
 RUN touch -a -m ./src/main.rs
 RUN cargo build --release
 

@@ -79,7 +79,7 @@ jobs:
         with:
           push: true
           context: .
-          tags: ${{ vars.REGISTRY_URL }}/app/mkworld-overlay:latest
+          tags: "${{ vars.REGISTRY_URL }}/app/mkworld-overlay:latest"
           cache-from: type=gha
           cache-to: type=gha
 

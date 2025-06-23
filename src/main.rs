@@ -52,7 +52,7 @@ impl AppState {
 
     async fn get_cached_or_fetch(&self, player_name: &str) -> Result<PlayerData, String> {
         let cache_key = player_name.to_lowercase();
-        let cache_duration = Duration::from_secs(30);
+        let cache_duration = Duration::from_secs(60);
 
         // Check cache first
         {
@@ -106,6 +106,10 @@ impl AppState {
     }
 }
 
+fn is_valid_player_name(name: &str) -> bool {
+    !name.is_empty() && name.chars().all(|c| c.is_alphanumeric() || c == ' ')
+}
+
 async fn api_player_details(
     Query(query): Query<PlayerQuery>,
     State(state): State<AppState>,
@@ -119,6 +123,14 @@ async fn api_player_details(
             return Err((StatusCode::BAD_REQUEST, Json(error)).into_response());
         }
     };
+
+    // Validate player name contains only alphanumeric characters and spaces
+    if !is_valid_player_name(&player_name) {
+        let error = ErrorResponse {
+            error: "Player name can only contain letters, numbers, and spaces".to_string(),
+        };
+        return Err((StatusCode::BAD_REQUEST, Json(error)).into_response());
+    }
 
     match state.get_cached_or_fetch(&player_name).await {
         Ok(data) => Ok(Json(data)),

@@ -404,7 +404,7 @@ body {
 }
 
 #mmr-value {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(4rem, 20vw, 15rem);
   font-weight: 700;
   font-family: "RacersDelight", monospace;
   color: white;

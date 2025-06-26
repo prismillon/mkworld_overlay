@@ -21,7 +21,7 @@ html {
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     sans-serif;
-  line-height: 1.6;
+  line-height: 1;
   color: #333;
   background: #f9f9f9;
   overflow-x: hidden;
@@ -386,16 +386,16 @@ body {
 }
 
 #mmr-display {
-  background: none;
-  border: none;
-  padding: 0;
+  background: rgba(31, 41, 55, 0.7);
+  border: 2px solid rgba(107, 114, 128, 0.6);
+  border-radius: 30px;
+  padding: 8px 16px;
   text-align: center;
   max-width: 90vw;
   position: relative;
-}
-
-#mmr-display.error {
-  /* No special styling for error state since there's no box */
+  box-shadow: 0 0 0 4px rgba(55, 65, 81, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  display: inline-block;
 }
 
 #mmr-content {
@@ -404,11 +404,11 @@ body {
 }
 
 #mmr-value {
-  font-size: clamp(4rem, 20vw, 15rem);
+  font-size: 72px;
   font-weight: 700;
   font-family: "RacersDelight", monospace;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.9);
   margin-bottom: 0;
   letter-spacing: 2px;
 }
@@ -501,10 +501,6 @@ body {
   .player-card {
     margin: 1rem;
     padding: 1.5rem;
-  }
-
-  #mmr-display {
-    /* No special mobile styling needed */
   }
 }
 

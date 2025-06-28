@@ -184,7 +184,7 @@ async fn main() -> anyhow::Result<()> {
         .parse::<u16>()
         .unwrap_or(3000);
 
-    let addr = format!("0.0.0.0:{}", port);
+    let addr = format!("0.0.0.0:{port}");
     info!("Starting server on {}", addr);
 
     // Start the server

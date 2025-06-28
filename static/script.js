@@ -40,32 +40,42 @@ class ModernMMROverlay {
 
     bindEvents() {
         // Search form submission
-        this.searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const playerName = this.playerInput.value.trim();
-            if (playerName) {
-                this.currentPlayerName = playerName;
-                this.fetchPlayerData(playerName);
-            }
-        });
+        if (this.searchForm) {
+            this.searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (this.playerInput) {
+                    const playerName = this.playerInput.value.trim();
+                    if (playerName) {
+                        this.currentPlayerName = playerName;
+                        this.fetchPlayerData(playerName);
+                    }
+                }
+            });
+        }
 
         // Copy URL button
-        this.copyUrlButton.addEventListener('click', () => {
-            this.copyOverlayUrl();
-        });
+        if (this.copyUrlButton) {
+            this.copyUrlButton.addEventListener('click', () => {
+                this.copyOverlayUrl();
+            });
+        }
 
         // Real-time input validation
-        this.playerInput.addEventListener('input', () => {
-            this.validateInput();
-        });
+        if (this.playerInput) {
+            this.playerInput.addEventListener('input', () => {
+                this.validateInput();
+            });
 
-        // Enter key on input
-        this.playerInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.searchForm.dispatchEvent(new Event('submit'));
-            }
-        });
+            // Enter key on input
+            this.playerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.searchForm) {
+                        this.searchForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+        }
     }
 
     getPlayerNameFromUrl() {
@@ -74,18 +84,28 @@ class ModernMMROverlay {
     }
 
     showOverlayMode() {
-        this.overlayContainer.classList.remove('hidden');
-        this.mainApp.classList.add('hidden');
+        if (this.overlayContainer) {
+            this.overlayContainer.classList.remove('hidden');
+        }
+        if (this.mainApp) {
+            this.mainApp.classList.add('hidden');
+        }
         document.body.style.background = 'transparent';
     }
 
     showMainApp() {
-        this.mainApp.classList.remove('hidden');
-        this.overlayContainer.classList.add('hidden');
+        if (this.mainApp) {
+            this.mainApp.classList.remove('hidden');
+        }
+        if (this.overlayContainer) {
+            this.overlayContainer.classList.add('hidden');
+        }
         document.body.style.background = '#f8fafc';
     }
 
     validateInput() {
+        if (!this.playerInput || !this.searchButton) return;
+
         const value = this.playerInput.value.trim();
         const isValid = value.length > 0;
 
@@ -150,9 +170,11 @@ class ModernMMROverlay {
         // Update overlay mode - only show the number
         if (this.mmrValue) {
             this.mmrValue.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
-            const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
-            if (overlayMmrDisplay) {
-                overlayMmrDisplay.classList.remove('error');
+            if (this.overlayContainer) {
+                const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
+                if (overlayMmrDisplay) {
+                    overlayMmrDisplay.classList.remove('error');
+                }
             }
         }
 
@@ -160,7 +182,9 @@ class ModernMMROverlay {
         if (this.displayPlayerName && this.mmrText) {
             // Always update player name when new data arrives
             this.displayPlayerName.textContent = playerName;
-            this.playerCard.classList.remove('hidden');
+            if (this.playerCard) {
+                this.playerCard.classList.remove('hidden');
+            }
 
             // Always update the MMR number
             this.mmrText.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
@@ -172,9 +196,11 @@ class ModernMMROverlay {
         // Only show error in overlay mode if we don't have valid data yet
         if (this.mmrValue && !this.hasValidData) {
             this.mmrValue.textContent = 'Error Loading';
-            const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
-            if (overlayMmrDisplay) {
-                overlayMmrDisplay.classList.add('error');
+            if (this.overlayContainer) {
+                const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
+                if (overlayMmrDisplay) {
+                    overlayMmrDisplay.classList.add('error');
+                }
             }
         }
 
@@ -184,7 +210,7 @@ class ModernMMROverlay {
             this.errorMessage.classList.remove('hidden');
 
             // Only hide player card if we don't have valid data yet
-            if (!this.hasValidData) {
+            if (!this.hasValidData && this.playerCard) {
                 this.playerCard.classList.add('hidden');
             }
         }
@@ -201,9 +227,14 @@ class ModernMMROverlay {
     setLoadingState(isLoading) {
         if (isLoading) {
             // Update search button
-            this.searchButton.classList.add('loading');
-            this.searchButton.disabled = true;
-            this.searchButton.querySelector('.button-text').textContent = 'Loading...';
+            if (this.searchButton) {
+                this.searchButton.classList.add('loading');
+                this.searchButton.disabled = true;
+                const buttonText = this.searchButton.querySelector('.button-text');
+                if (buttonText) {
+                    buttonText.textContent = 'Loading...';
+                }
+            }
 
             // For overlay mode, don't show loading text - keep the old value
             // Only show loading if we don't have valid data yet
@@ -213,9 +244,14 @@ class ModernMMROverlay {
             }
         } else {
             // Reset search button
-            this.searchButton.classList.remove('loading');
-            this.searchButton.disabled = false;
-            this.searchButton.querySelector('.button-text').textContent = 'Get MMR';
+            if (this.searchButton) {
+                this.searchButton.classList.remove('loading');
+                this.searchButton.disabled = false;
+                const buttonText = this.searchButton.querySelector('.button-text');
+                if (buttonText) {
+                    buttonText.textContent = 'Get MMR';
+                }
+            }
 
             // Reset overlay loading state
             if (this.mmrValue) {
@@ -276,18 +312,32 @@ class ModernMMROverlay {
     }
 
     showCopySuccess() {
+        if (!this.copyUrlButton) return;
+
         const copyIcon = this.copyUrlButton.querySelector('.copy-icon');
         const checkIcon = this.copyUrlButton.querySelector('.check-icon');
         const copyText = this.copyUrlButton.querySelector('.copy-text');
 
-        copyIcon.classList.add('hidden');
-        checkIcon.classList.remove('hidden');
-        copyText.textContent = 'Copied!';
+        if (copyIcon) {
+            copyIcon.classList.add('hidden');
+        }
+        if (checkIcon) {
+            checkIcon.classList.remove('hidden');
+        }
+        if (copyText) {
+            copyText.textContent = 'Copied!';
+        }
 
         setTimeout(() => {
-            copyIcon.classList.remove('hidden');
-            checkIcon.classList.add('hidden');
-            copyText.textContent = 'Copy Overlay URL';
+            if (copyIcon) {
+                copyIcon.classList.remove('hidden');
+            }
+            if (checkIcon) {
+                checkIcon.classList.add('hidden');
+            }
+            if (copyText) {
+                copyText.textContent = 'Copy Overlay URL';
+            }
         }, 2000);
     }
 

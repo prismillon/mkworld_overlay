@@ -10,8 +10,8 @@ class ModernMMROverlay {
         // DOM elements
         this.overlayContainer = document.getElementById('overlay-container');
         this.mainApp = document.getElementById('main-app');
-        this.mmrDisplay = document.getElementById('mmr-display');
-        this.mmrValue = document.getElementById('mmr-value');
+        this.mmrValue = document.getElementById('mmr-value'); // overlay mode
+        this.mmrText = document.getElementById('mmr-text'); // main app mode
         this.playerNameDisplay = document.getElementById('player-name');
         this.searchForm = document.getElementById('search-form');
         this.playerInput = document.getElementById('player-input');
@@ -19,7 +19,6 @@ class ModernMMROverlay {
         this.errorMessage = document.getElementById('error-message');
         this.playerCard = document.getElementById('player-card');
         this.displayPlayerName = document.getElementById('display-player-name');
-        this.mmrText = document.getElementById('mmr-text');
         this.copyUrlButton = document.getElementById('copy-url-button');
 
         this.init();
@@ -151,7 +150,10 @@ class ModernMMROverlay {
         // Update overlay mode - only show the number
         if (this.mmrValue) {
             this.mmrValue.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
-            this.mmrDisplay.classList.remove('error');
+            const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
+            if (overlayMmrDisplay) {
+                overlayMmrDisplay.classList.remove('error');
+            }
         }
 
         // Update main app mode
@@ -170,7 +172,10 @@ class ModernMMROverlay {
         // Only show error in overlay mode if we don't have valid data yet
         if (this.mmrValue && !this.hasValidData) {
             this.mmrValue.textContent = 'Error Loading';
-            this.mmrDisplay.classList.add('error');
+            const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
+            if (overlayMmrDisplay) {
+                overlayMmrDisplay.classList.add('error');
+            }
         }
 
         // Update main app mode - only show error if we don't have valid data

@@ -217,14 +217,37 @@ body {
 .mmr-display-main {
   text-align: center;
   margin: 1.5rem 0;
+  background: rgba(55, 65, 81, 0.7);
+  border: none;
+  border-radius: 30px;
+  padding: 12px 20px;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+  position: relative;
+}
+
+.mmr-display-main::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 3px solid rgba(178, 178, 178, 0.842);
+  border-radius: 28px;
+  pointer-events: none;
 }
 
 .mmr-text {
-  font-size: 2.5rem;
-  font-weight: 900;
+  font-size: 72px;
+  font-weight: 700;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.9);
   font-family: "RacersDelight", monospace;
+  margin-bottom: 0;
+  letter-spacing: 2px;
+  position: relative;
+  z-index: 1;
 }
 
 .player-actions {
@@ -386,16 +409,27 @@ body {
 }
 
 #mmr-display {
-  background: rgba(31, 41, 55, 0.7);
-  border: 2px solid rgba(107, 114, 128, 0.6);
+  background: rgba(55, 65, 81, 0.7);
+  border: none;
   border-radius: 30px;
-  padding: 8px 16px;
+  padding: 12px 20px;
   text-align: center;
   max-width: 90vw;
   position: relative;
-  box-shadow: 0 0 0 4px rgba(55, 65, 81, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   display: inline-block;
+}
+
+#mmr-display::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 3px solid rgba(178, 178, 178, 0.842);
+  border-radius: 28px;
+  pointer-events: none;
 }
 
 #mmr-content {

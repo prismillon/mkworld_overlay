@@ -216,7 +216,7 @@ body {
 
 /* Unified MMR Display Component */
 .mmr-display {
-  background: rgba(55, 65, 81, 0.7);
+  background: rgba(0, 0, 0, 0.582);
   border: none;
   border-radius: 30px;
   padding: 12px 20px;

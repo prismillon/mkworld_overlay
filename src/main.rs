@@ -77,7 +77,7 @@ impl AppState {
             .get(&url)
             .send()
             .await
-            .map_err(|e| format!("Network error: {}", e))?;
+            .map_err(|e| format!("Network error: {e}"))?;
 
         if !response.status().is_success() {
             let status = response.status();
@@ -85,13 +85,13 @@ impl AppState {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(format!("API error {}: {}", status, error_text));
+            return Err(format!("API error {status}: {error_text}"));
         }
 
         let player_data: PlayerData = response
             .json()
             .await
-            .map_err(|e| format!("JSON parse error: {}", e))?;
+            .map_err(|e| format!("JSON parse error: {e}"))?;
 
         // Update cache
         {
@@ -107,7 +107,10 @@ impl AppState {
 }
 
 fn is_valid_player_name(name: &str) -> bool {
-    !name.is_empty() && name.chars().all(|c| c.is_alphanumeric() || c == ' ')
+    !name.is_empty()
+        && name
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == ' ' || c == '-')
 }
 
 async fn api_player_details(
@@ -127,7 +130,7 @@ async fn api_player_details(
     // Validate player name contains only alphanumeric characters and spaces
     if !is_valid_player_name(&player_name) {
         let error = ErrorResponse {
-            error: "Player name can only contain letters, numbers, and spaces".to_string(),
+            error: "Player name can only contain letters, numbers, spaces, and hyphens".to_string(),
         };
         return Err((StatusCode::BAD_REQUEST, Json(error)).into_response());
     }

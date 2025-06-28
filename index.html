@@ -20,9 +20,9 @@
     <div id="app">
       <!-- Overlay Mode (when ?name= parameter exists) -->
       <div id="overlay-container" class="hidden">
-        <div id="mmr-display">
-          <div id="mmr-content">
-            <div id="mmr-value">--</div>
+        <div class="mmr-display">
+          <div class="mmr-content">
+            <div id="mmr-value" class="mmr-number">--</div>
             <div id="player-name"></div>
           </div>
         </div>
@@ -60,8 +60,10 @@
               <div class="player-header">
                 <div class="player-info">
                   <h3 id="display-player-name"></h3>
-                  <div class="mmr-display-main">
-                    <span id="mmr-text" class="mmr-text">0</span>
+                  <div class="mmr-display">
+                    <div class="mmr-content">
+                      <div id="mmr-text" class="mmr-number">0</div>
+                    </div>
                   </div>
                 </div>
                 <div class="player-actions">

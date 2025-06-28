@@ -214,31 +214,37 @@ body {
   color: #2d3748;
 }
 
-.mmr-display-main {
-  text-align: center;
-  margin: 1.5rem 0;
+/* Unified MMR Display Component */
+.mmr-display {
   background: rgba(55, 65, 81, 0.7);
   border: none;
   border-radius: 30px;
   padding: 12px 20px;
+  text-align: center;
   backdrop-filter: blur(10px);
   display: inline-block;
   position: relative;
+  margin: 1.5rem 0;
 }
 
-.mmr-display-main::before {
+.mmr-display::before {
   content: "";
   position: absolute;
   top: 4px;
   left: 4px;
   right: 4px;
   bottom: 4px;
-  border: 3px solid rgba(178, 178, 178, 0.842);
+  border: 3px solid rgba(149, 149, 149, 0.842);
   border-radius: 28px;
   pointer-events: none;
 }
 
-.mmr-text {
+.mmr-content {
+  position: relative;
+  z-index: 1;
+}
+
+.mmr-number {
   font-size: 72px;
   font-weight: 700;
   color: white;
@@ -246,8 +252,11 @@ body {
   font-family: "RacersDelight", monospace;
   margin-bottom: 0;
   letter-spacing: 2px;
-  position: relative;
-  z-index: 1;
+}
+
+/* Error state for MMR display */
+.mmr-display.error .mmr-number {
+  color: white;
 }
 
 .player-actions {
@@ -408,47 +417,10 @@ body {
   z-index: 1000;
 }
 
-#mmr-display {
-  background: rgba(55, 65, 81, 0.7);
-  border: none;
-  border-radius: 30px;
-  padding: 12px 20px;
-  text-align: center;
+/* Overlay-specific positioning */
+#overlay-container .mmr-display {
   max-width: 90vw;
-  position: relative;
-  backdrop-filter: blur(10px);
-  display: inline-block;
-}
-
-#mmr-display::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
-  border: 3px solid rgba(178, 178, 178, 0.842);
-  border-radius: 28px;
-  pointer-events: none;
-}
-
-#mmr-content {
-  position: relative;
-  z-index: 1;
-}
-
-#mmr-value {
-  font-size: 72px;
-  font-weight: 700;
-  font-family: "RacersDelight", monospace;
-  color: white;
-  text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.9);
-  margin-bottom: 0;
-  letter-spacing: 2px;
-}
-
-#mmr-display.error #mmr-value {
-  color: white;
+  margin: 0; /* Remove default margin for overlay mode */
 }
 
 #player-name {
@@ -548,7 +520,7 @@ body {
     border-width: 2px;
   }
 
-  #mmr-display {
+  .mmr-display {
     background: #000;
     border-width: 3px;
   }

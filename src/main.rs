@@ -110,7 +110,7 @@ fn is_valid_player_name(name: &str) -> bool {
     !name.is_empty()
         && name
             .chars()
-            .all(|c| c.is_alphanumeric() || c == ' ' || c == '-')
+            .all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '_')
 }
 
 async fn api_player_details(

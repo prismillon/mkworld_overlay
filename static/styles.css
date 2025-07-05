@@ -1,13 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
-/* Font face for custom font */
+/* Font face for Avenir Black */
 @font-face {
-  font-family: "RacersDelight";
-  src: url("/static/RacersDelight.otf") format("opentype");
+  font-family: "Avenir Black";
+  src: url("/static/Avenir-Black.ttf") format("truetype");
   font-display: swap;
 }
 
-/* CSS Reset and Base */
 * {
   margin: 0;
   padding: 0;
@@ -187,7 +184,6 @@ body {
   margin-left: auto;
   margin-right: auto;
   font-weight: 500;
-  backdrop-filter: blur(10px);
 }
 
 /* Player Card */
@@ -216,12 +212,11 @@ body {
 
 /* Unified MMR Display Component */
 .mmr-display {
-  background: rgba(0, 0, 0, 0.582);
+  background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 30px;
   padding: 12px 20px;
   text-align: center;
-  backdrop-filter: blur(10px);
   display: inline-block;
   position: relative;
   margin: 1.5rem 0;
@@ -234,7 +229,7 @@ body {
   left: 4px;
   right: 4px;
   bottom: 4px;
-  border: 3px solid rgba(149, 149, 149, 0.842);
+  border: 3px solid rgba(115, 115, 115, 0.842);
   border-radius: 28px;
   pointer-events: none;
 }
@@ -246,12 +241,14 @@ body {
 
 .mmr-number {
   font-size: 72px;
-  font-weight: 700;
+  font-weight: 900;
   color: white;
-  text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.9);
-  font-family: "RacersDelight", monospace;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+  font-family: "Avenir Black", "Avenir", "Segoe UI", "Helvetica Neue", Arial,
+    sans-serif;
+  margin-top: 7px;
   margin-bottom: 0;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
 /* Error state for MMR display */

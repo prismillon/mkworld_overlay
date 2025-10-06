@@ -21,6 +21,9 @@ struct PlayerQuery {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct PlayerData {
     mmr: Option<f64>,
+    rank: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    rank_icon_url: Option<String>,
     #[serde(flatten)]
     other: HashMap<String, serde_json::Value>,
 }
@@ -28,6 +31,22 @@ struct PlayerData {
 #[derive(Debug, Serialize)]
 struct ErrorResponse {
     error: String,
+}
+
+fn rank_to_url(rank: &str) -> Option<&'static str> {
+    match rank.to_lowercase().as_str() {
+        "iron" => Some("https://i.imgur.com/AYRMVEu.png"),
+        "bronze" => Some("https://i.imgur.com/DxFLvtO.png"),
+        "silver" => Some("https://i.imgur.com/xgFyiYa.png"),
+        "gold" => Some("https://i.imgur.com/6yAatOq.png"),
+        "platinum" => Some("https://i.imgur.com/8v8IjHE.png"),
+        "sapphire" => Some("https://i.imgur.com/bXEfUSV.png"),
+        "ruby" => Some("https://i.imgur.com/WU2NlJQ.png"),
+        "diamond" => Some("https://i.imgur.com/RDlvdvA.png"),
+        "master" => Some("https://i.imgur.com/3yBab63.png"),
+        "grand master" | "grandmaster" => Some("https://i.imgur.com/EWXzu2U.png"),
+        _ => None,
+    }
 }
 
 #[derive(Clone)]
@@ -88,10 +107,13 @@ impl AppState {
             return Err(format!("API error {status}: {error_text}"));
         }
 
-        let player_data: PlayerData = response
+        let mut player_data: PlayerData = response
             .json()
             .await
             .map_err(|e| format!("JSON parse error: {e}"))?;
+
+        // Add rank_icon_url using rank_to_url
+        player_data.rank_icon_url = rank_to_url(&player_data.rank).map(|s| s.to_string());
 
         // Update cache
         {

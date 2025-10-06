@@ -249,6 +249,20 @@ body {
   margin-top: 7px;
   margin-bottom: 0;
   letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  line-height: 1;
+}
+
+/* Rank icon styling */
+.mmr-number img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+  margin-top: -10px;
 }
 
 /* Error state for MMR display */

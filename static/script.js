@@ -163,13 +163,14 @@ class ModernMMROverlay {
     displayPlayerData(data, playerName) {
         const mmr = data.mmr;
         const mmrValue = mmr !== undefined && mmr !== null ? Math.round(mmr) : 'N/A';
+        const rankIconUrl = data.rank_icon_url;
 
         // Mark that we have valid data
         this.hasValidData = true;
 
-        // Update overlay mode - only show the number
+        // Update overlay mode - show rank icon and MMR
         if (this.mmrValue) {
-            this.mmrValue.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
+            this.updateMmrDisplay(this.mmrValue, mmrValue, rankIconUrl);
             if (this.overlayContainer) {
                 const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
                 if (overlayMmrDisplay) {
@@ -186,10 +187,28 @@ class ModernMMROverlay {
                 this.playerCard.classList.remove('hidden');
             }
 
-            // Always update the MMR number
-            this.mmrText.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
+            // Always update the MMR number with rank icon
+            this.updateMmrDisplay(this.mmrText, mmrValue, rankIconUrl);
             this.hideError();
         }
+    }
+
+    updateMmrDisplay(element, mmrValue, rankIconUrl) {
+        // Clear existing content
+        element.innerHTML = '';
+
+        // Add rank icon if available
+        if (rankIconUrl) {
+            const rankIcon = document.createElement('img');
+            rankIcon.src = rankIconUrl;
+            rankIcon.alt = 'Rank Icon';
+            element.appendChild(rankIcon);
+        }
+
+        // Add MMR text
+        const mmrText = document.createElement('span');
+        mmrText.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
+        element.appendChild(mmrText);
     }
 
     displayError(message) {

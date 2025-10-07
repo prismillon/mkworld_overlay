@@ -35,16 +35,16 @@ struct ErrorResponse {
 
 fn rank_to_url(rank: &str) -> Option<&'static str> {
     match rank.to_lowercase().as_str() {
-        "iron" => Some("https://i.imgur.com/AYRMVEu.png"),
-        "bronze" => Some("https://i.imgur.com/DxFLvtO.png"),
-        "silver" => Some("https://i.imgur.com/xgFyiYa.png"),
-        "gold" => Some("https://i.imgur.com/6yAatOq.png"),
-        "platinum" => Some("https://i.imgur.com/8v8IjHE.png"),
-        "sapphire" => Some("https://i.imgur.com/bXEfUSV.png"),
-        "ruby" => Some("https://i.imgur.com/WU2NlJQ.png"),
-        "diamond" => Some("https://i.imgur.com/RDlvdvA.png"),
-        "master" => Some("https://i.imgur.com/3yBab63.png"),
-        "grand master" | "grandmaster" => Some("https://i.imgur.com/EWXzu2U.png"),
+        "iron" => Some("/static/image/iron.png"),
+        "bronze" => Some("/static/image/bronze.png"),
+        "silver" => Some("/static/image/silver.png"),
+        "gold" => Some("/static/image/gold.png"),
+        "platinum" => Some("/static/image/platinum.png"),
+        "sapphire" => Some("/static/image/sapphire.png"),
+        "ruby" => Some("/static/image/ruby.png"),
+        "diamond" => Some("/static/image/diamond.png"),
+        "master" => Some("/static/image/master.png"),
+        "grand master" | "grandmaster" => Some("/static/image/grandmaster.png"),
         _ => None,
     }
 }

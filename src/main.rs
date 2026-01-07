@@ -73,7 +73,6 @@ impl AppState {
         let cache_key = player_name.to_lowercase();
         let cache_duration = Duration::from_secs(60);
 
-        // Check cache first
         {
             let cache = self.cache.read().await;
             if let Some((data, timestamp)) = cache.get(&cache_key) {
@@ -84,7 +83,6 @@ impl AppState {
             }
         }
 
-        // Fetch from API
         info!("Fetching data for player: {}", player_name);
         let url = format!(
             "https://lounge.mkcentral.com/api/player/details?name={}&game=mkworld",
@@ -112,15 +110,12 @@ impl AppState {
             .await
             .map_err(|e| format!("JSON parse error: {e}"))?;
 
-        // Add rank_icon_url using rank_to_url
         player_data.rank_icon_url = rank_to_url(&player_data.rank).map(|s| s.to_string());
 
-        // Update cache
         {
             let mut cache = self.cache.write().await;
             cache.insert(cache_key, (player_data.clone(), std::time::Instant::now()));
 
-            // Clean old cache entries
             cache.retain(|_, (_, timestamp)| timestamp.elapsed() < cache_duration * 2);
         }
 
@@ -132,7 +127,7 @@ fn is_valid_player_name(name: &str) -> bool {
     !name.is_empty()
         && name
             .chars()
-            .all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '_')
+            .all(|c| c.is_alphanumeric() || c == ' ' || c == '.' || c == '_' || c == '-')
 }
 
 async fn api_player_details(
@@ -149,7 +144,6 @@ async fn api_player_details(
         }
     };
 
-    // Validate player name contains only alphanumeric characters and spaces
     if !is_valid_player_name(&player_name) {
         let error = ErrorResponse {
             error: "Player name can only contain letters, numbers, spaces, and hyphens".to_string(),
@@ -177,7 +171,6 @@ async fn health_check() -> &'static str {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Initialize tracing
     tracing_subscriber::fmt()
         .with_env_filter(
             std::env::var("RUST_LOG")
@@ -187,13 +180,11 @@ async fn main() -> anyhow::Result<()> {
 
     let state = AppState::new();
 
-    // Create CORS layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods([Method::GET])
         .allow_headers(Any);
 
-    // Build the router
     let app = Router::new()
         .route("/", get(serve_index))
         .route("/health", get(health_check))
@@ -203,7 +194,6 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors)
         .with_state(state);
 
-    // Determine the port
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())
         .parse::<u16>()
@@ -212,7 +202,6 @@ async fn main() -> anyhow::Result<()> {
     let addr = format!("0.0.0.0:{port}");
     info!("Starting server on {}", addr);
 
-    // Start the server
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;
 

@@ -1,478 +1,519 @@
 class ModernMMROverlay {
-    constructor() {
-        this.apiBaseUrl = '/api/player/details';
-        this.cache = new Map();
-        this.cacheTimeout = 30000; // 30 seconds cache
-        this.autoRefreshInterval = null;
-        this.currentPlayerName = '';
-        this.hasValidData = false; // Track if we have valid MMR data
+  constructor() {
+    this.apiBaseUrl = "/api/player/details";
+    this.cache = new Map();
+    this.cacheTimeout = 30000; // 30 seconds cache
+    this.autoRefreshInterval = null;
+    this.currentPlayerName = "";
+    this.currentGame = "24p"; // Default to 24p
+    this.hasValidData = false; // Track if we have valid MMR data
 
-        // DOM elements
-        this.overlayContainer = document.getElementById('overlay-container');
-        this.mainApp = document.getElementById('main-app');
-        this.mmrValue = document.getElementById('mmr-value'); // overlay mode
-        this.mmrText = document.getElementById('mmr-text'); // main app mode
-        this.playerNameDisplay = document.getElementById('player-name');
-        this.searchForm = document.getElementById('search-form');
-        this.playerInput = document.getElementById('player-input');
-        this.searchButton = document.getElementById('search-button');
-        this.errorMessage = document.getElementById('error-message');
-        this.playerCard = document.getElementById('player-card');
-        this.displayPlayerName = document.getElementById('display-player-name');
-        this.copyUrlButton = document.getElementById('copy-url-button');
+    // DOM elements
+    this.overlayContainer = document.getElementById("overlay-container");
+    this.mainApp = document.getElementById("main-app");
+    this.mmrValue = document.getElementById("mmr-value"); // overlay mode
+    this.mmrText = document.getElementById("mmr-text"); // main app mode
+    this.playerNameDisplay = document.getElementById("player-name");
+    this.searchForm = document.getElementById("search-form");
+    this.playerInput = document.getElementById("player-input");
+    this.searchButton = document.getElementById("search-button");
+    this.errorMessage = document.getElementById("error-message");
+    this.playerCard = document.getElementById("player-card");
+    this.displayPlayerName = document.getElementById("display-player-name");
+    this.copyUrlButton = document.getElementById("copy-url-button");
 
-        this.init();
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    const playerName = this.getPlayerNameFromUrl();
+
+    if (playerName) {
+      this.showOverlayMode();
+      this.currentPlayerName = playerName;
+      this.currentGame = this.getGameFromUrl();
+      this.fetchPlayerData(playerName);
+      this.startAutoRefresh(60000); // Auto refresh every minute for overlay mode
+    } else {
+      this.showMainApp();
     }
+  }
 
-    init() {
-        this.bindEvents();
-        const playerName = this.getPlayerNameFromUrl();
-
-        if (playerName) {
-            this.showOverlayMode();
-            this.currentPlayerName = playerName;
-            this.fetchPlayerData(playerName);
-            this.startAutoRefresh(60000); // Auto refresh every minute for overlay mode
-        } else {
-            this.showMainApp();
-        }
-    }
-
-    bindEvents() {
-        // Search form submission
-        if (this.searchForm) {
-            this.searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (this.playerInput) {
-                    const playerName = this.playerInput.value.trim();
-                    if (playerName) {
-                        this.currentPlayerName = playerName;
-                        this.fetchPlayerData(playerName);
-                    }
-                }
-            });
-        }
-
-        // Copy URL button
-        if (this.copyUrlButton) {
-            this.copyUrlButton.addEventListener('click', () => {
-                this.copyOverlayUrl();
-            });
-        }
-
-        // Real-time input validation
+  bindEvents() {
+    // Search form submission
+    if (this.searchForm) {
+      this.searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
         if (this.playerInput) {
-            this.playerInput.addEventListener('input', () => {
-                this.validateInput();
-            });
-
-            // Enter key on input
-            this.playerInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (this.searchForm) {
-                        this.searchForm.dispatchEvent(new Event('submit'));
-                    }
-                }
-            });
+          const playerName = this.playerInput.value.trim();
+          if (playerName) {
+            this.currentPlayerName = playerName;
+            const gameRadio = this.searchForm.querySelector(
+              'input[name="game"]:checked',
+            );
+            this.currentGame = gameRadio ? gameRadio.value : "24p";
+            this.cache.delete(playerName.toLowerCase()); // Force fresh fetch
+            this.fetchPlayerData(playerName);
+          }
         }
-    }
+      });
 
-    getPlayerNameFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('name');
-    }
-
-    showOverlayMode() {
-        if (this.overlayContainer) {
-            this.overlayContainer.classList.remove('hidden');
-        }
-        if (this.mainApp) {
-            this.mainApp.classList.add('hidden');
-        }
-        document.body.style.background = 'transparent';
-    }
-
-    showMainApp() {
-        if (this.mainApp) {
-            this.mainApp.classList.remove('hidden');
-        }
-        if (this.overlayContainer) {
-            this.overlayContainer.classList.add('hidden');
-        }
-        document.body.style.background = '#f8fafc';
-    }
-
-    validateInput() {
-        if (!this.playerInput || !this.searchButton) return;
-
-        const value = this.playerInput.value.trim();
-        const isValid = value.length > 0;
-
-        this.searchButton.disabled = !isValid;
-
-        if (isValid) {
-            this.searchButton.classList.remove('disabled');
-        } else {
-            this.searchButton.classList.add('disabled');
-        }
-    }
-
-    async fetchPlayerData(playerName) {
-        try {
-            // Check cache first
-            const cacheKey = playerName.toLowerCase();
-            const cached = this.cache.get(cacheKey);
-
-            if (cached && (Date.now() - cached.timestamp) < this.cacheTimeout) {
-                this.displayPlayerData(cached.data, playerName);
-                return;
+      // Game mode radio change - auto refetch if we have a player
+      this.searchForm
+        .querySelectorAll('input[name="game"]')
+        .forEach((radio) => {
+          radio.addEventListener("change", (e) => {
+            this.currentGame = e.target.value;
+            if (this.currentPlayerName) {
+              this.cache.delete(this.currentPlayerName.toLowerCase());
+              this.fetchPlayerData(this.currentPlayerName);
             }
-
-            this.setLoadingState(true);
-
-            const url = `${this.apiBaseUrl}?name=${encodeURIComponent(playerName)}`;
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            // Cache the result
-            this.cache.set(cacheKey, {
-                data: data,
-                timestamp: Date.now()
-            });
-
-            // Clean old cache entries
-            this.cleanCache();
-
-            this.displayPlayerData(data, playerName);
-
-        } catch (error) {
-            console.error('Error fetching player data:', error);
-            this.displayError(error.message);
-        } finally {
-            this.setLoadingState(false);
-        }
+          });
+        });
     }
 
-    displayPlayerData(data, playerName) {
-        const mmr = data.mmr;
-        const mmrValue = mmr !== undefined && mmr !== null ? Math.round(mmr) : 'N/A';
-        const rankIconUrl = data.rank_icon_url;
-
-        // Mark that we have valid data
-        this.hasValidData = true;
-
-        // Update overlay mode - show rank icon and MMR
-        if (this.mmrValue) {
-            this.updateMmrDisplay(this.mmrValue, mmrValue, rankIconUrl);
-            if (this.overlayContainer) {
-                const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
-                if (overlayMmrDisplay) {
-                    overlayMmrDisplay.classList.remove('error');
-                }
-            }
-        }
-
-        // Update main app mode
-        if (this.displayPlayerName && this.mmrText) {
-            // Always update player name when new data arrives
-            this.displayPlayerName.textContent = playerName;
-            if (this.playerCard) {
-                this.playerCard.classList.remove('hidden');
-            }
-
-            // Always update the MMR number with rank icon
-            this.updateMmrDisplay(this.mmrText, mmrValue, rankIconUrl);
-            this.hideError();
-        }
+    // Copy URL button
+    if (this.copyUrlButton) {
+      this.copyUrlButton.addEventListener("click", () => {
+        this.copyOverlayUrl();
+      });
     }
 
-    updateMmrDisplay(element, mmrValue, rankIconUrl) {
-        // Clear existing content
-        element.innerHTML = '';
+    // Real-time input validation
+    if (this.playerInput) {
+      this.playerInput.addEventListener("input", () => {
+        this.validateInput();
+      });
 
-        // Add rank icon if available
-        if (rankIconUrl) {
-            const rankIcon = document.createElement('img');
-            rankIcon.src = rankIconUrl;
-            rankIcon.alt = 'Rank Icon';
-            element.appendChild(rankIcon);
+      // Enter key on input
+      this.playerInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (this.searchForm) {
+            this.searchForm.dispatchEvent(new Event("submit"));
+          }
         }
+      });
+    }
+  }
 
-        // Add MMR text
-        const mmrText = document.createElement('span');
-        mmrText.textContent = mmrValue === 'N/A' ? 'N/A' : mmrValue.toString();
-        element.appendChild(mmrText);
+  getPlayerNameFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("name");
+  }
+
+  getGameFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("game") === "12p" ? "12p" : "24p";
+  }
+
+  showOverlayMode() {
+    if (this.overlayContainer) {
+      this.overlayContainer.classList.remove("hidden");
+    }
+    if (this.mainApp) {
+      this.mainApp.classList.add("hidden");
+    }
+    document.body.style.background = "transparent";
+  }
+
+  showMainApp() {
+    if (this.mainApp) {
+      this.mainApp.classList.remove("hidden");
+    }
+    if (this.overlayContainer) {
+      this.overlayContainer.classList.add("hidden");
+    }
+    document.body.style.background = "#f8fafc";
+  }
+
+  validateInput() {
+    if (!this.playerInput || !this.searchButton) return;
+
+    const value = this.playerInput.value.trim();
+    const isValid = value.length > 0;
+
+    this.searchButton.disabled = !isValid;
+
+    if (isValid) {
+      this.searchButton.classList.remove("disabled");
+    } else {
+      this.searchButton.classList.add("disabled");
+    }
+  }
+
+  async fetchPlayerData(playerName) {
+    try {
+      // Check cache first
+      const cacheKey = playerName.toLowerCase();
+      const cached = this.cache.get(cacheKey);
+
+      if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+        this.displayPlayerData(cached.data, playerName);
+        return;
+      }
+
+      this.setLoadingState(true);
+
+      const url = `${this.apiBaseUrl}?name=${encodeURIComponent(playerName)}&game=${this.currentGame}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      const data = await response.json();
+
+      // Cache the result
+      this.cache.set(cacheKey, {
+        data: data,
+        timestamp: Date.now(),
+      });
+
+      // Clean old cache entries
+      this.cleanCache();
+
+      this.displayPlayerData(data, playerName);
+    } catch (error) {
+      console.error("Error fetching player data:", error);
+      this.displayError(error.message);
+    } finally {
+      this.setLoadingState(false);
+    }
+  }
+
+  displayPlayerData(data, playerName) {
+    const mmr = data.mmr;
+    const mmrValue =
+      mmr !== undefined && mmr !== null ? Math.round(mmr) : "N/A";
+    const rankIconUrl = data.rank_icon_url;
+
+    // Mark that we have valid data
+    this.hasValidData = true;
+
+    // Update overlay mode - show rank icon and MMR
+    if (this.mmrValue) {
+      this.updateMmrDisplay(this.mmrValue, mmrValue, rankIconUrl);
+      if (this.overlayContainer) {
+        const overlayMmrDisplay =
+          this.overlayContainer.querySelector(".mmr-display");
+        if (overlayMmrDisplay) {
+          overlayMmrDisplay.classList.remove("error");
+        }
+      }
     }
 
-    displayError(message) {
-        // Only show error in overlay mode if we don't have valid data yet
-        if (this.mmrValue && !this.hasValidData) {
-            this.mmrValue.textContent = 'Error Loading';
-            if (this.overlayContainer) {
-                const overlayMmrDisplay = this.overlayContainer.querySelector('.mmr-display');
-                if (overlayMmrDisplay) {
-                    overlayMmrDisplay.classList.add('error');
-                }
-            }
-        }
+    // Update main app mode
+    if (this.displayPlayerName && this.mmrText) {
+      // Always update player name when new data arrives
+      this.displayPlayerName.textContent = playerName;
+      if (this.playerCard) {
+        this.playerCard.classList.remove("hidden");
+      }
 
-        // Update main app mode - only show error if we don't have valid data
-        if (this.errorMessage) {
-            this.errorMessage.textContent = message;
-            this.errorMessage.classList.remove('hidden');
+      // Always update the MMR number with rank icon
+      this.updateMmrDisplay(this.mmrText, mmrValue, rankIconUrl);
+      this.hideError();
+    }
+  }
 
-            // Only hide player card if we don't have valid data yet
-            if (!this.hasValidData && this.playerCard) {
-                this.playerCard.classList.add('hidden');
-            }
-        }
+  updateMmrDisplay(element, mmrValue, rankIconUrl) {
+    // Clear existing content
+    element.innerHTML = "";
 
-        console.error('MMR Overlay Error:', message);
+    // Add rank icon if available
+    if (rankIconUrl) {
+      const rankIcon = document.createElement("img");
+      rankIcon.src = rankIconUrl;
+      rankIcon.alt = "Rank Icon";
+      element.appendChild(rankIcon);
     }
 
-    hideError() {
-        if (this.errorMessage) {
-            this.errorMessage.classList.add('hidden');
+    // Add MMR text
+    const mmrText = document.createElement("span");
+    mmrText.textContent = mmrValue === "N/A" ? "N/A" : mmrValue.toString();
+    element.appendChild(mmrText);
+  }
+
+  displayError(message) {
+    // Only show error in overlay mode if we don't have valid data yet
+    if (this.mmrValue && !this.hasValidData) {
+      this.mmrValue.textContent = "Error Loading";
+      if (this.overlayContainer) {
+        const overlayMmrDisplay =
+          this.overlayContainer.querySelector(".mmr-display");
+        if (overlayMmrDisplay) {
+          overlayMmrDisplay.classList.add("error");
         }
+      }
     }
 
-    setLoadingState(isLoading) {
-        if (isLoading) {
-            // Update search button
-            if (this.searchButton) {
-                this.searchButton.classList.add('loading');
-                this.searchButton.disabled = true;
-                const buttonText = this.searchButton.querySelector('.button-text');
-                if (buttonText) {
-                    buttonText.textContent = 'Loading...';
-                }
-            }
+    // Update main app mode - only show error if we don't have valid data
+    if (this.errorMessage) {
+      this.errorMessage.textContent = message;
+      this.errorMessage.classList.remove("hidden");
 
-            // For overlay mode, don't show loading text - keep the old value
-            // Only show loading if we don't have valid data yet
-            if (this.mmrValue && !this.hasValidData) {
-                this.mmrValue.textContent = 'Loading...';
-                this.mmrValue.classList.add('loading');
-            }
-        } else {
-            // Reset search button
-            if (this.searchButton) {
-                this.searchButton.classList.remove('loading');
-                this.searchButton.disabled = false;
-                const buttonText = this.searchButton.querySelector('.button-text');
-                if (buttonText) {
-                    buttonText.textContent = 'Get MMR';
-                }
-            }
-
-            // Reset overlay loading state
-            if (this.mmrValue) {
-                this.mmrValue.classList.remove('loading');
-            }
-        }
+      // Only hide player card if we don't have valid data yet
+      if (!this.hasValidData && this.playerCard) {
+        this.playerCard.classList.add("hidden");
+      }
     }
 
-    startAutoRefresh(intervalMs) {
-        if (this.autoRefreshInterval) {
-            clearInterval(this.autoRefreshInterval);
+    console.error("MMR Overlay Error:", message);
+  }
+
+  hideError() {
+    if (this.errorMessage) {
+      this.errorMessage.classList.add("hidden");
+    }
+  }
+
+  setLoadingState(isLoading) {
+    if (isLoading) {
+      // Update search button
+      if (this.searchButton) {
+        this.searchButton.classList.add("loading");
+        this.searchButton.disabled = true;
+        const buttonText = this.searchButton.querySelector(".button-text");
+        if (buttonText) {
+          buttonText.textContent = "Loading...";
         }
+      }
 
-        if (!this.currentPlayerName) return;
+      // For overlay mode, don't show loading text - keep the old value
+      // Only show loading if we don't have valid data yet
+      if (this.mmrValue && !this.hasValidData) {
+        this.mmrValue.textContent = "Loading...";
+        this.mmrValue.classList.add("loading");
+      }
+    } else {
+      // Reset search button
+      if (this.searchButton) {
+        this.searchButton.classList.remove("loading");
+        this.searchButton.disabled = false;
+        const buttonText = this.searchButton.querySelector(".button-text");
+        if (buttonText) {
+          buttonText.textContent = "Get MMR";
+        }
+      }
 
-        this.autoRefreshInterval = setInterval(() => {
-            console.log('Auto-refreshing MMR data...');
-            this.fetchPlayerData(this.currentPlayerName);
-        }, intervalMs);
+      // Reset overlay loading state
+      if (this.mmrValue) {
+        this.mmrValue.classList.remove("loading");
+      }
+    }
+  }
 
-        console.log(`Auto-refresh enabled: updating every ${intervalMs / 1000} seconds`);
+  startAutoRefresh(intervalMs) {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
     }
 
-    async copyOverlayUrl() {
-        if (!this.currentPlayerName) return;
+    if (!this.currentPlayerName) return;
 
-        const url = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(this.currentPlayerName)}`;
+    this.autoRefreshInterval = setInterval(() => {
+      console.log("Auto-refreshing MMR data...");
+      this.fetchPlayerData(this.currentPlayerName);
+    }, intervalMs);
 
-        try {
-            await navigator.clipboard.writeText(url);
-            this.showCopySuccess();
-        } catch (err) {
-            // Fallback for older browsers
-            this.fallbackCopyTextToClipboard(url);
-        }
+    console.log(
+      `Auto-refresh enabled: updating every ${intervalMs / 1000} seconds`,
+    );
+  }
+
+  async copyOverlayUrl() {
+    if (!this.currentPlayerName) return;
+
+    let url = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(this.currentPlayerName)}`;
+    if (this.currentGame === "12p") {
+      url += "&game=12p";
     }
 
-    fallbackCopyTextToClipboard(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
+    try {
+      await navigator.clipboard.writeText(url);
+      this.showCopySuccess();
+    } catch (err) {
+      // Fallback for older browsers
+      this.fallbackCopyTextToClipboard(url);
+    }
+  }
 
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
+  fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
 
-        try {
-            document.execCommand('copy');
-            this.showCopySuccess();
-        } catch (err) {
-            console.error('Fallback: Unable to copy', err);
-        }
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
 
-        document.body.removeChild(textArea);
+    try {
+      document.execCommand("copy");
+      this.showCopySuccess();
+    } catch (err) {
+      console.error("Fallback: Unable to copy", err);
     }
 
-    showCopySuccess() {
-        if (!this.copyUrlButton) return;
+    document.body.removeChild(textArea);
+  }
 
-        const copyIcon = this.copyUrlButton.querySelector('.copy-icon');
-        const checkIcon = this.copyUrlButton.querySelector('.check-icon');
-        const copyText = this.copyUrlButton.querySelector('.copy-text');
+  showCopySuccess() {
+    if (!this.copyUrlButton) return;
 
-        if (copyIcon) {
-            copyIcon.classList.add('hidden');
-        }
-        if (checkIcon) {
-            checkIcon.classList.remove('hidden');
-        }
-        if (copyText) {
-            copyText.textContent = 'Copied!';
-        }
+    const copyIcon = this.copyUrlButton.querySelector(".copy-icon");
+    const checkIcon = this.copyUrlButton.querySelector(".check-icon");
+    const copyText = this.copyUrlButton.querySelector(".copy-text");
 
-        setTimeout(() => {
-            if (copyIcon) {
-                copyIcon.classList.remove('hidden');
-            }
-            if (checkIcon) {
-                checkIcon.classList.add('hidden');
-            }
-            if (copyText) {
-                copyText.textContent = 'Copy Overlay URL';
-            }
-        }, 2000);
+    if (copyIcon) {
+      copyIcon.classList.add("hidden");
+    }
+    if (checkIcon) {
+      checkIcon.classList.remove("hidden");
+    }
+    if (copyText) {
+      copyText.textContent = "Copied!";
     }
 
-    addSuccessAnimation() {
-        // Add a subtle success animation to the player card
-        if (this.playerCard && !this.playerCard.classList.contains('hidden')) {
-            this.playerCard.style.animation = 'none';
-            setTimeout(() => {
-                this.playerCard.style.animation = 'slideUp 0.5s ease-out';
-            }, 10);
-        }
-    }
+    setTimeout(() => {
+      if (copyIcon) {
+        copyIcon.classList.remove("hidden");
+      }
+      if (checkIcon) {
+        checkIcon.classList.add("hidden");
+      }
+      if (copyText) {
+        copyText.textContent = "Copy Overlay URL";
+      }
+    }, 2000);
+  }
 
-    cleanCache() {
-        const now = Date.now();
-        for (const [key, value] of this.cache.entries()) {
-            if (now - value.timestamp > this.cacheTimeout * 2) {
-                this.cache.delete(key);
-            }
-        }
+  addSuccessAnimation() {
+    // Add a subtle success animation to the player card
+    if (this.playerCard && !this.playerCard.classList.contains("hidden")) {
+      this.playerCard.style.animation = "none";
+      setTimeout(() => {
+        this.playerCard.style.animation = "slideUp 0.5s ease-out";
+      }, 10);
     }
+  }
 
-    // Public method to manually refresh data
-    refresh() {
-        if (this.currentPlayerName) {
-            this.fetchPlayerData(this.currentPlayerName);
-        }
+  cleanCache() {
+    const now = Date.now();
+    for (const [key, value] of this.cache.entries()) {
+      if (now - value.timestamp > this.cacheTimeout * 2) {
+        this.cache.delete(key);
+      }
     }
+  }
+
+  // Public method to manually refresh data
+  refresh() {
+    if (this.currentPlayerName) {
+      this.fetchPlayerData(this.currentPlayerName);
+    }
+  }
 }
 
 // Initialize the overlay when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const overlay = new ModernMMROverlay();
+document.addEventListener("DOMContentLoaded", () => {
+  const overlay = new ModernMMROverlay();
 
-    // Make overlay globally available for debugging
-    window.mmrOverlay = overlay;
+  // Make overlay globally available for debugging
+  window.mmrOverlay = overlay;
 
-    // Handle browser back/forward navigation
-    window.addEventListener('popstate', () => {
-        location.reload();
+  // Handle browser back/forward navigation
+  window.addEventListener("popstate", () => {
+    location.reload();
+  });
+
+  // Preload font for better performance
+  if (document.fonts) {
+    document.fonts.ready.then(() => {
+      console.log("Custom font loaded successfully");
     });
+  }
 
-    // Preload font for better performance
-    if (document.fonts) {
-        document.fonts.ready.then(() => {
-            console.log('Custom font loaded successfully');
-        });
+  // Add keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd + R to refresh
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      e.key === "r" &&
+      overlay.currentPlayerName
+    ) {
+      e.preventDefault();
+      overlay.refresh();
     }
 
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + R to refresh
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r' && overlay.currentPlayerName) {
-            e.preventDefault();
-            overlay.refresh();
-        }
-
-        // Escape to clear input
-        if (e.key === 'Escape' && overlay.playerInput === document.activeElement) {
-            overlay.playerInput.value = '';
-            overlay.playerInput.blur();
-            overlay.validateInput();
-        }
-    });
-
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-
-    // Add intersection observer for animations
-    if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-in');
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
-        // Observe instruction cards
-        document.querySelectorAll('.instruction-card').forEach(card => {
-            observer.observe(card);
-        });
+    // Escape to clear input
+    if (e.key === "Escape" && overlay.playerInput === document.activeElement) {
+      overlay.playerInput.value = "";
+      overlay.playerInput.blur();
+      overlay.validateInput();
     }
+  });
+
+  // Add smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute("href"));
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    });
+  });
+
+  // Add intersection observer for animations
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-in");
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      },
+    );
+
+    // Observe instruction cards
+    document.querySelectorAll(".instruction-card").forEach((card) => {
+      observer.observe(card);
+    });
+  }
 });
 
 // Add CSS for intersection observer animations
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.textContent = `
     .instruction-card {
         opacity: 0;
         transform: translateY(20px);
         transition: opacity 0.6s ease, transform 0.6s ease;
     }
-    
+
     .instruction-card.animate-in {
         opacity: 1;
         transform: translateY(0);
     }
-    
+
     .search-button.disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);

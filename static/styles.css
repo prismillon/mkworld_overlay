@@ -1,551 +1,577 @@
 /* Font face for Avenir Black */
 @font-face {
-  font-family: "Avenir Black";
-  src: url("/static/Avenir-Black.ttf") format("truetype");
-  font-display: swap;
+    font-family: "Avenir Black";
+    src: url("/static/Avenir-Black.ttf") format("truetype");
+    font-display: swap;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    sans-serif;
-  line-height: 1;
-  color: #333;
-  background: #f9f9f9;
-  overflow-x: hidden;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Roboto",
+        sans-serif;
+    line-height: 1;
+    color: #333;
+    background: #f9f9f9;
+    overflow-x: hidden;
 }
 
 /* Utility Classes */
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 /* Main App Container */
 #app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #main-app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #333;
-  padding: 4rem 2rem;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 70vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #333;
+    padding: 4rem 2rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
 }
 
 .hero-content {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  position: relative;
-  z-index: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
 }
 
 .hero-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0;
-  font-family: "RacersDelight", monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    font-family: "RacersDelight", monospace;
 }
 
 .hero-subtitle {
-  font-size: 1rem;
-  margin-bottom: 3rem;
-  color: #666;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+    font-size: 1rem;
+    margin-bottom: 3rem;
+    color: #666;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Search Form */
 .search-form {
-  margin-bottom: 2rem;
+    margin-bottom: 2rem;
 }
 
 .input-group {
-  display: flex;
-  max-width: 500px;
-  margin: 0 auto;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.game-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #4a5568;
+}
+
+.toggle-option input[type="radio"] {
+    accent-color: #4a5568;
 }
 
 .player-input {
-  flex: 1;
-  min-width: 280px;
-  padding: 0.875rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: white;
-  color: #333;
-  transition: all 0.2s ease;
+    flex: 1;
+    min-width: 280px;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    color: #333;
+    transition: all 0.2s ease;
 }
 
 .player-input:focus {
-  outline: none;
-  border-color: #4a5568;
-  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+    outline: none;
+    border-color: #4a5568;
+    box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
 }
 
 .player-input::placeholder {
-  color: #9ca3af;
+    color: #9ca3af;
 }
 
 .search-button {
-  padding: 0.875rem 1.5rem;
-  background: #4a5568;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 120px;
-  transition: all 0.2s ease;
+    padding: 0.875rem 1.5rem;
+    background: #4a5568;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 120px;
+    transition: all 0.2s ease;
 }
 
 .search-button:hover:not(:disabled) {
-  background: #2d3748;
-  transform: translateY(-1px);
+    background: #2d3748;
+    transform: translateY(-1px);
 }
 
 .search-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .button-icon {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  z-index: 1;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 .button-text {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 /* Loading Animation for Button */
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .search-button.loading .button-icon {
-  animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
 }
 
 /* Error Message */
 .error-message {
-  margin-top: 1rem;
-  padding: 1rem 1.5rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
-  color: #dc2626;
-  text-align: center;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  font-weight: 500;
+    margin-top: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    color: #dc2626;
+    text-align: center;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 500;
 }
 
 /* Player Card */
 .player-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-top: 2rem;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .player-header {
-  text-align: center;
+    text-align: center;
 }
 
 .player-info h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2d3748;
 }
 
 /* Unified MMR Display Component */
 .mmr-display {
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
-  border-radius: 30px;
-  padding: 12px 20px;
-  text-align: center;
-  display: inline-block;
-  position: relative;
-  margin: 1.5rem 0;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 30px;
+    padding: 12px 20px;
+    text-align: center;
+    display: inline-block;
+    position: relative;
+    margin: 1.5rem 0;
 }
 
 .mmr-display::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
-  border: 3px solid rgba(115, 115, 115, 0.842);
-  border-radius: 28px;
-  pointer-events: none;
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border: 3px solid rgba(115, 115, 115, 0.842);
+    border-radius: 28px;
+    pointer-events: none;
 }
 
 .mmr-content {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .mmr-number {
-  font-size: 72px;
-  font-weight: 900;
-  color: white;
-  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
-  font-family: "Avenir Black", "Avenir", "Segoe UI", "Helvetica Neue", Arial,
-    sans-serif;
-  margin-top: 7px;
-  margin-bottom: 0;
-  letter-spacing: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  line-height: 1;
+    font-size: 72px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+    font-family:
+        "Avenir Black", "Avenir", "Segoe UI", "Helvetica Neue", Arial,
+        sans-serif;
+    margin-top: 7px;
+    margin-bottom: 0;
+    letter-spacing: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    line-height: 1;
 }
 
 /* Rank icon styling */
 .mmr-number img {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
-  margin-top: -10px;
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+    margin-top: -10px;
 }
 
 /* Error state for MMR display */
 .mmr-display.error .mmr-number {
-  color: white;
+    color: white;
 }
 
 .player-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
 }
 
 .copy-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  cursor: pointer;
-  background: white;
-  color: #4a5568;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    background: white;
+    color: #4a5568;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 .copy-button:hover {
-  background: #f7fafc;
-  border-color: #cbd5e0;
-  transform: translateY(-1px);
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
 }
 
 /* Instructions Section */
 .instructions-section {
-  background: white;
-  padding: 4rem 2rem;
-  position: relative;
+    background: white;
+    padding: 4rem 2rem;
+    position: relative;
 }
 
 .language-section {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 30px auto;
-  padding: 0 10px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+    padding: 0 10px;
 }
 
 .language-section h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 8px;
-  text-align: center;
-  color: #2d3748;
-  font-weight: 600;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    text-align: center;
+    color: #2d3748;
+    font-weight: 600;
 }
 
 .instructions-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
 }
 
 .instructions-content {
-  max-width: 1200px;
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 2.5rem;
-  text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 2.5rem;
+    text-align: center;
 }
 
 .section-icon {
-  width: 32px;
-  height: 32px;
-  color: #10b981;
+    width: 32px;
+    height: 32px;
+    color: #10b981;
 }
 
 .instruction-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
 .instruction-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .card-header {
-  margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .card-header h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
 }
 
 .instruction-card ol,
 .instruction-card ul {
-  color: #333;
-  line-height: 1.6;
-  padding-left: 1.5rem;
+    color: #333;
+    line-height: 1.6;
+    padding-left: 1.5rem;
 }
 
 .instruction-card li {
-  margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .instruction-card strong {
-  color: #2d3748;
-  font-weight: 600;
+    color: #2d3748;
+    font-weight: 600;
 }
 
 /* Footer */
 .footer {
-  background: white;
-  color: #718096;
-  text-align: center;
-  padding: 2rem;
-  margin-top: auto;
-  border-top: 1px solid #e2e8f0;
+    background: white;
+    color: #718096;
+    text-align: center;
+    padding: 2rem;
+    margin-top: auto;
+    border-top: 1px solid #e2e8f0;
 }
 
 .footer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 1px;
-  background: #10b981;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 1px;
+    background: #10b981;
 }
 
 /* Overlay Mode Styles */
 #overlay-container {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 }
 
 /* Overlay-specific positioning */
 #overlay-container .mmr-display {
-  max-width: 90vw;
-  margin: 0; /* Remove default margin for overlay mode */
+    max-width: 90vw;
+    margin: 0; /* Remove default margin for overlay mode */
 }
 
 #player-name {
-  display: none;
+    display: none;
 }
 
 /* Loading States */
 .loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  color: #10b981;
-  font-size: 1.25rem;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #10b981;
+    font-size: 1.25rem;
+    font-weight: 500;
 }
 
 .loading-spinner svg {
-  animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 2rem 1rem;
-    min-height: 60vh;
-  }
+    .hero-section {
+        padding: 2rem 1rem;
+        min-height: 60vh;
+    }
 
-  .hero-header {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+    .hero-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 
-  .input-group {
-    flex-direction: column;
-    align-items: stretch;
-    max-width: 100%;
-    padding: 0 1rem;
-  }
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 100%;
+        padding: 0 1rem;
+    }
 
-  .player-input {
-    min-width: auto;
-  }
+    .player-input {
+        min-width: auto;
+    }
 
-  .instruction-cards {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+    .instruction-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 
-  .instructions-section {
-    padding: 2rem 1rem;
-  }
+    .instructions-section {
+        padding: 2rem 1rem;
+    }
 
-  .player-actions {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
+    .player-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
-  .section-title {
-    font-size: 2rem;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+    .section-title {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 
 @media (max-width: 480px) {
-  .hero-content {
-    padding: 0 0.5rem;
-  }
+    .hero-content {
+        padding: 0 0.5rem;
+    }
 
-  .instruction-card {
-    padding: 1.5rem;
-    border-radius: 20px;
-  }
+    .instruction-card {
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
 
-  .hero-header h1 {
-    font-size: 2rem;
-  }
+    .hero-header h1 {
+        font-size: 2rem;
+    }
 
-  .hero-subtitle {
-    font-size: 1rem;
-  }
+    .hero-subtitle {
+        font-size: 1rem;
+    }
 
-  .player-card {
-    margin: 1rem;
-    padding: 1.5rem;
-  }
+    .player-card {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .hero-section {
-    background: #000;
-  }
+    .hero-section {
+        background: #000;
+    }
 
-  .instruction-card {
-    border-width: 2px;
-  }
+    .instruction-card {
+        border-width: 2px;
+    }
 
-  .mmr-display {
-    background: #000;
-    border-width: 3px;
-  }
+    .mmr-display {
+        background: #000;
+        border-width: 3px;
+    }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 
-  html {
-    scroll-behavior: auto;
-  }
+    html {
+        scroll-behavior: auto;
+    }
 }

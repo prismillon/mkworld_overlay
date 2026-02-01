@@ -16,6 +16,8 @@ use tracing::{error, info};
 #[derive(Debug, Deserialize)]
 struct PlayerQuery {
     name: Option<String>,
+    #[serde(default)]
+    game: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -69,8 +71,16 @@ impl AppState {
         }
     }
 
-    async fn get_cached_or_fetch(&self, player_name: &str) -> Result<PlayerData, String> {
-        let cache_key = player_name.to_lowercase();
+    async fn get_cached_or_fetch(
+        &self,
+        player_name: &str,
+        game: &str,
+    ) -> Result<PlayerData, String> {
+        let game_param = match game {
+            "12p" => "mkworld12p",
+            _ => "mkworld24p",
+        };
+        let cache_key = format!("{}:{}", player_name.to_lowercase(), game_param);
         let cache_duration = Duration::from_secs(60);
 
         {
@@ -83,10 +93,14 @@ impl AppState {
             }
         }
 
-        info!("Fetching data for player: {}", player_name);
+        info!(
+            "Fetching data for player: {} (game: {})",
+            player_name, game_param
+        );
         let url = format!(
-            "https://lounge.mkcentral.com/api/player/details?name={}&game=mkworld",
-            urlencoding::encode(player_name)
+            "https://lounge.mkcentral.com/api/player/details?name={}&game={}",
+            urlencoding::encode(player_name),
+            game_param
         );
 
         let response = self
@@ -151,7 +165,7 @@ async fn api_player_details(
         return Err((StatusCode::BAD_REQUEST, Json(error)).into_response());
     }
 
-    match state.get_cached_or_fetch(&player_name).await {
+    match state.get_cached_or_fetch(&player_name, &query.game).await {
         Ok(data) => Ok(Json(data)),
         Err(error_msg) => {
             error!("Failed to fetch player data: {}", error_msg);

@@ -1,19 +1,19 @@
 {
-    "name": "mkworld-overlay",
-    "version": "1.0.0",
-    "description": "MK World MMR Overlay - Modern Responsive Web App",
-    "scripts": {
-        "start": "cargo run",
-        "build": "cargo build --release",
-        "dev": "cargo run"
-    },
-    "keywords": [
-        "mario-kart",
-        "mmr",
-        "overlay",
-        "streaming",
-        "obs"
-    ],
-    "author": "",
-    "license": "MIT"
+  "name": "mkworld-overlay",
+  "version": "1.0.0",
+  "description": "MK World MMR Overlay - Modern Responsive Web App",
+  "scripts": {
+    "start": "cargo run",
+    "build": "cargo build --release",
+    "dev": "cargo run"
+  },
+  "keywords": [
+    "mario-kart",
+    "mmr",
+    "overlay",
+    "streaming",
+    "obs"
+  ],
+  "author": "",
+  "license": "MIT"
 }

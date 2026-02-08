@@ -1,7 +1,7 @@
 use axum::{
     extract::{Query, State},
     http::{Method, StatusCode},
-    response::{Html, IntoResponse, Response},
+    response::{IntoResponse, Response},
     routing::get,
     Json, Router,
 };
@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc, time::Duration};
 use tower_http::{
     cors::{Any, CorsLayer},
-    services::ServeDir,
+    services::{ServeDir, ServeFile},
 };
 use tracing::{error, info};
 
@@ -175,10 +175,6 @@ async fn api_player_details(
     }
 }
 
-async fn serve_index() -> Html<&'static str> {
-    Html(include_str!("../index.html"))
-}
-
 async fn health_check() -> &'static str {
     "OK"
 }
@@ -199,12 +195,14 @@ async fn main() -> anyhow::Result<()> {
         .allow_methods([Method::GET])
         .allow_headers(Any);
 
+    let spa_fallback = ServeFile::new("dist/index.html");
+
     let app = Router::new()
-        .route("/", get(serve_index))
         .route("/health", get(health_check))
         .route("/api/player/details", get(api_player_details))
         .nest_service("/static", ServeDir::new("static"))
         .nest_service("/assets", ServeDir::new("dist/assets"))
+        .fallback_service(ServeDir::new("dist").not_found_service(spa_fallback))
         .layer(cors)
         .with_state(state);
 

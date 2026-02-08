@@ -4,8 +4,10 @@
   "description": "MK World MMR Overlay - Modern Responsive Web App",
   "scripts": {
     "start": "cargo run",
-    "build": "cargo build --release",
-    "dev": "cargo run"
+    "build": "cd frontend && bun run build && cd .. && cargo build --release",
+    "dev": "cd frontend && bun run dev",
+    "dev:backend": "cargo run",
+    "frontend:install": "cd frontend && bun install"
   },
   "keywords": [
     "mario-kart",

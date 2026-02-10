@@ -54,7 +54,7 @@ export function SearchForm({
               checked={game === mode}
               onChange={() => onGameChange(mode as GameMode)}
             />
-            <span>{mode}</span>
+            <span>{mode === "both" ? "Both" : mode}</span>
           </label>
         ))}
       </div>

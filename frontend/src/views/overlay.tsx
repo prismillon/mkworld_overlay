@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import type { GameMode } from "../types";
+import type { GameMode, OverlayField } from "../types";
 import { usePlayer, useInterval } from "../hooks";
 import { MmrBadge } from "../components";
 import { OVERLAY } from "../constants";
@@ -7,14 +7,23 @@ import { OVERLAY } from "../constants";
 interface OverlayProps {
   playerName: string;
   game: GameMode;
+  fields: OverlayField[];
 }
 
-export function Overlay({ playerName, game }: OverlayProps) {
-  const { data, isLoading, error, fetch } = usePlayer();
+export function Overlay({ playerName, game, fields: _fields }: OverlayProps) {
+  const primary = usePlayer();
+  const secondary = usePlayer();
+
+  const isBoth = game === "both";
 
   const refresh = useCallback(() => {
-    fetch(playerName, game);
-  }, [fetch, playerName, game]);
+    if (isBoth) {
+      primary.fetch(playerName, "24p");
+      secondary.fetch(playerName, "12p");
+    } else {
+      primary.fetch(playerName, game);
+    }
+  }, [primary.fetch, secondary.fetch, playerName, game, isBoth]);
 
   useEffect(() => {
     refresh();
@@ -26,13 +35,20 @@ export function Overlay({ playerName, game }: OverlayProps) {
 
   useInterval(refresh, OVERLAY.AUTO_REFRESH_MS);
 
+  // Core (MMR + rank) always shown; extra fields cycle when selected
   return (
     <div className="overlay">
       <MmrBadge
-        mmr={data?.mmr ?? null}
-        rankIconUrl={data?.rankIconUrl}
-        isLoading={isLoading}
-        hasError={!!error}
+        mmr={primary.data?.mmr ?? null}
+        rankIconUrl={primary.data?.rankIconUrl}
+        isLoading={primary.isLoading}
+        hasError={!!primary.error}
+        fields={_fields}
+        player={primary.data}
+        game={game}
+        player12p={isBoth ? secondary.data : undefined}
+        mmr12p={isBoth ? (secondary.data?.mmr ?? null) : undefined}
+        rankIconUrl12p={isBoth ? secondary.data?.rankIconUrl : undefined}
       />
     </div>
   );

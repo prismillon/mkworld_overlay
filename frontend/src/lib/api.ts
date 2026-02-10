@@ -1,4 +1,4 @@
-import type { Player, PlayerApiResponse } from "../types";
+import type { Player } from "../types";
 import { API, CACHE } from "../constants";
 
 interface CacheEntry {
@@ -7,14 +7,6 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-
-function transformResponse(response: PlayerApiResponse): Player {
-  return {
-    mmr: response.mmr,
-    rank: response.rank,
-    rankIconUrl: response.rank_icon_url,
-  };
-}
 
 function getCacheKey(name: string, game: string): string {
   return `${name.toLowerCase()}:${game}`;
@@ -63,8 +55,7 @@ export async function fetchPlayer(name: string, game: string): Promise<Player> {
     throw new Error(error.error ?? `HTTP ${response.status}`);
   }
 
-  const json: PlayerApiResponse = await response.json();
-  const player = transformResponse(json);
+  const player: Player = await response.json();
 
   setCache(cacheKey, player);
 

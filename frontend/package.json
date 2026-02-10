@@ -8,7 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "motion": "^12.34.0",
     "react": "^19.0.0",
+    "react-country-flag": "^3.1.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {

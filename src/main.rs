@@ -20,14 +20,71 @@ struct PlayerQuery {
     game: String,
 }
 
+/// Raw upstream API response from MKCentral
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct UpstreamPlayerData {
+    name: String,
+    country_code: Option<String>,
+    country_name: Option<String>,
+    mmr: Option<i64>,
+    max_mmr: Option<i64>,
+    overall_rank: Option<i64>,
+    events_played: i64,
+    win_rate: Option<f64>,
+    win_loss_last_ten: Option<String>,
+    gain_loss_last_ten: Option<i64>,
+    largest_gain: Option<i64>,
+    average_score: Option<f64>,
+    average_last_ten: Option<f64>,
+    rank: String,
+    #[serde(default)]
+    mmr_changes: Vec<MmrChange>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MmrChange {
+    mmr_delta: Option<i64>,
+    reason: Option<String>,
+    #[serde(default)]
+    partner_scores: Vec<i64>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 struct PlayerData {
-    mmr: Option<f64>,
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country_name: Option<String>,
+    mmr: Option<i64>,
+    max_mmr: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    overall_rank: Option<i64>,
+    events_played: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    win_rate: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    win_loss_last_ten: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    gain_loss_last_ten: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    largest_gain: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    average_score: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    average_last_ten: Option<f64>,
     rank: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     rank_icon_url: Option<String>,
-    #[serde(flatten)]
-    other: HashMap<String, serde_json::Value>,
+    /// Average score of partners across all Table events
+    #[serde(skip_serializing_if = "Option::is_none")]
+    partner_avg: Option<f64>,
+    /// MMR delta from the most recent Table event
+    #[serde(skip_serializing_if = "Option::is_none")]
+    last_diff: Option<i64>,
 }
 
 #[derive(Debug, Serialize)]
@@ -119,10 +176,53 @@ impl AppState {
             return Err(format!("API error {status}: {error_text}"));
         }
 
-        let mut player_data: PlayerData = response
+        let upstream: UpstreamPlayerData = response
             .json()
             .await
             .map_err(|e| format!("JSON parse error: {e}"))?;
+
+        // Compute partner_avg from all partner scores across Table events
+        let table_events: Vec<&MmrChange> = upstream
+            .mmr_changes
+            .iter()
+            .filter(|c| c.reason.as_deref() == Some("Table"))
+            .collect();
+
+        let partner_avg = {
+            let all_scores: Vec<i64> = table_events
+                .iter()
+                .flat_map(|c| c.partner_scores.iter().copied())
+                .collect();
+            if all_scores.is_empty() {
+                None
+            } else {
+                let sum: i64 = all_scores.iter().sum();
+                Some((sum as f64 / all_scores.len() as f64 * 100.0).round() / 100.0)
+            }
+        };
+
+        // Compute last_diff from the most recent Table event's mmrDelta
+        let last_diff = table_events.first().and_then(|c| c.mmr_delta);
+
+        let mut player_data = PlayerData {
+            name: upstream.name,
+            country_code: upstream.country_code,
+            country_name: upstream.country_name,
+            mmr: upstream.mmr,
+            max_mmr: upstream.max_mmr,
+            overall_rank: upstream.overall_rank,
+            events_played: upstream.events_played,
+            win_rate: upstream.win_rate,
+            win_loss_last_ten: upstream.win_loss_last_ten,
+            gain_loss_last_ten: upstream.gain_loss_last_ten,
+            largest_gain: upstream.largest_gain,
+            average_score: upstream.average_score,
+            average_last_ten: upstream.average_last_ten,
+            rank: upstream.rank,
+            rank_icon_url: None,
+            partner_avg,
+            last_diff,
+        };
 
         player_data.rank_icon_url = rank_to_url(&player_data.rank).map(|s| s.to_string());
 

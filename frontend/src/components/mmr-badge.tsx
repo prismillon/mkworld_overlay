@@ -137,6 +137,7 @@ export function MmrBadge({
         inlineLabel: INLINE_LABELS[f],
         colorClass,
         source: src,
+        rankIconUrl: pRankIconUrl,
       };
     });
     return [mmrSlide, ...extras];

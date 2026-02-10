@@ -234,7 +234,7 @@ body {
 .mmr-badge {
     background: rgba(0, 0, 0, 0.6);
     border-radius: 30px;
-    padding: 12px 20px;
+    padding: 12px 12px;
     text-align: center;
     display: inline-block;
     position: relative;
@@ -252,7 +252,6 @@ body {
 
 .mmr-badge__content {
     position: relative;
-    z-index: 1;
 }
 
 .mmr-badge__value {
@@ -267,15 +266,25 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 6px;
     line-height: 1;
 }
 
-/* Fixed width for the digit area — always reserves space for 5 digits */
+/* Fixed width for the digit area */
 .mmr-badge__digits {
-    display: inline-block;
-    min-width: 5ch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 229px;
+    height: 72px;
     text-align: center;
+}
+
+/* In cycling mode the digits div clips the scroll animation */
+.mmr-badge__digits--cycling {
+    position: relative;
+    overflow: clip;
+    container-type: inline-size;
 }
 
 .mmr-badge__icon {
@@ -291,51 +300,6 @@ body {
 }
 
 /* --- Cycling mode --- */
-
-.mmr-badge--cycling {
-    display: inline-block;
-}
-
-.mmr-badge--cycling .mmr-badge__content {
-    position: relative;
-    /* Inherit font metrics so ch units resolve to the MMR digit font */
-    font-size: 72px;
-    font-weight: 900;
-    font-family:
-        "Avenir Black", "Avenir", "Segoe UI", "Helvetica Neue", Arial,
-        sans-serif;
-    letter-spacing: 3px;
-    /* Fixed width: icon (72px) + gap (12px) + 5 digits + gap (12px) + source col (~42px) */
-    min-width: calc(84px + 5ch + 54px);
-    min-height: 72px;
-}
-
-/* Fixed rank icon — absolutely positioned on the left, never moves */
-.mmr-badge__fixed-icon {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    z-index: 2;
-}
-
-/* Cycling text — positioned between the icon and the source label */
-.mmr-badge__cycle-text {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 84px; /* icon width (72px) + gap (12px) */
-    right: 52px; /* source label area */
-    height: calc(100% + 32px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-x: visible;
-    overflow-y: clip;
-    z-index: 2;
-}
 
 .mmr-badge__cycle-slide {
     display: flex;
@@ -426,33 +390,10 @@ body {
     margin-left: 0.4em;
 }
 
-/* Fixed source + diff column — full height on the right, source at top, diff at bottom */
-.mmr-badge__fixed-source {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 42px;
-    z-index: 2;
-    padding: 2px 0;
-}
-
-.mmr-badge__fixed-source .mmr-badge__source-label {
-    display: block;
-    text-align: center;
-}
-
-.mmr-badge__fixed-source .mmr-badge__last-diff {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 /* --- Source label (12p) / (24p) --- */
 
 .mmr-badge__source-label {
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 700;
     color: #f5c542;
     font-family: "Avenir Black", "Avenir", sans-serif;
@@ -471,6 +412,7 @@ body {
     justify-content: space-between;
     flex-shrink: 0;
     align-self: stretch;
+    width: 52px;
 }
 
 /* Last diff value shown at the bottom of the source column */

@@ -99,7 +99,7 @@ export function MmrBadge({
   const isBoth = game === "both";
   /** Label shown for the current game mode source */
   const sourceLabel =
-    game === "12p" ? "[12p]" : game === "both" ? undefined : "[24p]";
+    game === "12p" ? "12p" : game === "both" ? undefined : "24p";
 
   // --- cycling mode ---
   // Enable cycling when extra fields (excluding lastDiff) are selected, OR when "both" mode is active
@@ -147,16 +147,11 @@ export function MmrBadge({
 
     if (isBoth && player12p) {
       if (hasExtraFields) {
-        const slides24p = buildSlidesForPlayer(
-          player,
-          mmr,
-          "[24p]",
-          rankIconUrl,
-        );
+        const slides24p = buildSlidesForPlayer(player, mmr, "24p", rankIconUrl);
         const slides12p = buildSlidesForPlayer(
           player12p,
           mmr12p ?? null,
-          "[12p]",
+          "12p",
           rankIconUrl12p,
         );
         return [...slides24p, ...slides12p];
@@ -167,20 +162,20 @@ export function MmrBadge({
           label: "MMR",
           value: mmr !== null ? Math.round(mmr).toString() : "N/A",
           isMmr: true,
-          source: "[24p]",
+          source: "24p",
           rankIconUrl,
         },
         {
           label: "MMR",
           value: mmr12p != null ? Math.round(mmr12p).toString() : "N/A",
           isMmr: true,
-          source: "[12p]",
+          source: "12p",
           rankIconUrl: rankIconUrl12p,
         },
       ];
     }
 
-    const src = game === "12p" ? "[12p]" : "[24p]";
+    const src = game === "12p" ? "12p" : "24p";
     return buildSlidesForPlayer(player, mmr, src, rankIconUrl);
   }, [
     cyclingEnabled,
@@ -231,49 +226,24 @@ export function MmrBadge({
     return { value, colorClass };
   }
 
-  // --- simple mode (no extra fields, single game mode) ---
-  if (!cyclingEnabled) {
-    const lastDiff = formatLastDiff(player);
-    return (
-      <div
-        className={`mmr-badge ${hasError && mmr === null ? "mmr-badge--error" : ""}`}
-      >
-        <div className="mmr-badge__content">
-          <div
-            className={`mmr-badge__value ${isLoading && mmr === null ? "mmr-badge__value--loading" : ""}`}
-          >
-            {rankIconUrl && (
-              <img src={rankIconUrl} alt="Rank" className="mmr-badge__icon" />
-            )}
-            <span className="mmr-badge__digits">{displayValue}</span>
-            {sourceLabel && (
-              <div className="mmr-badge__source-col">
-                <span className="mmr-badge__source-label">{sourceLabel}</span>
-                {lastDiff && (
-                  <span
-                    className={`mmr-badge__last-diff ${lastDiff.colorClass}`}
-                  >
-                    {lastDiff.value}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- cycling mode rendering ---
-  const current = slides[activeIndex] ?? slides[0];
+  // --- shared layout for both modes ---
+  const current = cyclingEnabled ? (slides[activeIndex] ?? slides[0]) : null;
   const currentRankIcon = current?.rankIconUrl ?? rankIconUrl;
+  const lastDiff = formatLastDiff(player);
+
+  // Resolve the source label for cycling mode (animated) or static mode (fixed)
+  const currentSource = cyclingEnabled ? current?.source : sourceLabel;
 
   return (
-    <div className="mmr-badge mmr-badge--cycling">
+    <div
+      className={`mmr-badge ${hasError && mmr === null ? "mmr-badge--error" : ""}`}
+    >
       <div className="mmr-badge__content">
-        {/* Fixed rank icon on the left */}
-        <div className="mmr-badge__fixed-icon">
-          {isBoth ? (
+        <div
+          className={`mmr-badge__value ${isLoading && mmr === null ? "mmr-badge__value--loading" : ""}`}
+        >
+          {/* Icon — same position in both modes */}
+          {cyclingEnabled && isBoth ? (
             <AnimatePresence mode="popLayout">
               {currentRankIcon && (
                 <motion.img
@@ -293,104 +263,128 @@ export function MmrBadge({
               <img src={rankIconUrl} alt="Rank" className="mmr-badge__icon" />
             )
           )}
-        </div>
 
-        {/* Cycling text area — positioned over the text region */}
-        <div className="mmr-badge__cycle-text">
-          <AnimatePresence mode="popLayout">
-            <motion.div
-              key={activeIndex}
-              initial={{ y: -60, opacity: 0, filter: "blur(4px)" }}
-              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-              exit={{ y: 60, opacity: 0, filter: "blur(4px)" }}
-              transition={{
-                duration: SCROLL_DURATION,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="mmr-badge__cycle-slide"
-            >
-              {current.isMmr ? (
-                <span className="mmr-badge__cycle-value">{current.value}</span>
-              ) : current.field === "name" ? (
-                <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-name">
-                  {current.value}
-                  {current.countryCode && (
-                    <ReactCountryFlag
-                      countryCode={current.countryCode}
-                      svg
-                      className="mmr-badge__flag"
-                    />
-                  )}
-                </FitText>
-              ) : current.inlineLabel ? (
-                <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-inline">
-                  <span className="mmr-badge__cycle-inline-label">
-                    {current.inlineLabel}
-                  </span>{" "}
-                  <span className={current.colorClass ?? ""}>
-                    {current.value}
-                  </span>
-                </FitText>
-              ) : (
-                <FitText
-                  className="mmr-badge__cycle-value mmr-badge__cycle-value--extra"
-                  fitHeight
-                  padding={0.75}
+          {/* Digits area — same div in both modes */}
+          <div
+            className={`mmr-badge__digits ${cyclingEnabled ? "mmr-badge__digits--cycling" : ""}`}
+          >
+            {cyclingEnabled && current ? (
+              <AnimatePresence mode="popLayout">
+                <motion.div
+                  key={activeIndex}
+                  initial={{ y: -60, opacity: 0, filter: "blur(4px)" }}
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  exit={{ y: 60, opacity: 0, filter: "blur(4px)" }}
+                  transition={{
+                    duration: SCROLL_DURATION,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="mmr-badge__cycle-slide"
                 >
-                  <div className="mmr-badge__cycle-stat">
-                    <span className="mmr-badge__cycle-label">
-                      {current.label}
-                    </span>
-                    <span
-                      className={`mmr-badge__cycle-stat-value ${current.colorClass ?? ""}`}
-                    >
+                  {current.isMmr ? (
+                    <span className="mmr-badge__cycle-value">
                       {current.value}
                     </span>
-                  </div>
-                </FitText>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+                  ) : current.field === "name" ? (
+                    <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-name">
+                      {current.value}
+                      {current.countryCode && (
+                        <ReactCountryFlag
+                          countryCode={current.countryCode}
+                          svg
+                          className="mmr-badge__flag"
+                        />
+                      )}
+                    </FitText>
+                  ) : current.inlineLabel ? (
+                    <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-inline">
+                      <span className="mmr-badge__cycle-inline-label">
+                        {current.inlineLabel}
+                      </span>{" "}
+                      <span className={current.colorClass ?? ""}>
+                        {current.value}
+                      </span>
+                    </FitText>
+                  ) : (
+                    <FitText
+                      className="mmr-badge__cycle-value mmr-badge__cycle-value--extra"
+                      fitHeight
+                      padding={0.75}
+                    >
+                      <div className="mmr-badge__cycle-stat">
+                        <span className="mmr-badge__cycle-label">
+                          {current.label}
+                        </span>
+                        <span
+                          className={`mmr-badge__cycle-stat-value ${current.colorClass ?? ""}`}
+                        >
+                          {current.value}
+                        </span>
+                      </div>
+                    </FitText>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            ) : (
+              <span>{displayValue}</span>
+            )}
+          </div>
 
-        {/* Source label — fixed on the right, mirrors the rank icon */}
-        <div className="mmr-badge__fixed-source">
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={current.source}
-              className="mmr-badge__source-label"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {current.source}
-            </motion.span>
-          </AnimatePresence>
-
-          {/* Last diff shown below source label, only on MMR slides */}
-          <AnimatePresence mode="wait">
-            {lastDiffSelected &&
-              current.isMmr &&
-              (() => {
-                const diffPlayer =
-                  isBoth && current.source === "[12p]" ? player12p : player;
-                const diff = formatLastDiff(diffPlayer);
-                if (!diff) return null;
-                return (
+          {/* Source column — same position in both modes */}
+          {currentSource && (
+            <div className="mmr-badge__source-col">
+              {cyclingEnabled ? (
+                <AnimatePresence mode="popLayout">
                   <motion.span
-                    key={`diff-${current.source}`}
-                    className={`mmr-badge__last-diff ${diff.colorClass}`}
+                    key={currentSource}
+                    className="mmr-badge__source-label"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {diff.value}
+                    {currentSource}
                   </motion.span>
-                );
-              })()}
-          </AnimatePresence>
+                </AnimatePresence>
+              ) : (
+                <span className="mmr-badge__source-label">{currentSource}</span>
+              )}
+
+              {/* Last diff — static in simple mode, animated in cycling */}
+              {cyclingEnabled ? (
+                <AnimatePresence mode="wait">
+                  {lastDiffSelected &&
+                    current?.isMmr &&
+                    (() => {
+                      const diffPlayer =
+                        isBoth && current.source === "12p" ? player12p : player;
+                      const diff = formatLastDiff(diffPlayer);
+                      if (!diff) return null;
+                      return (
+                        <motion.span
+                          key={`diff-${current.source}`}
+                          className={`mmr-badge__last-diff ${diff.colorClass}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {diff.value}
+                        </motion.span>
+                      );
+                    })()}
+                </AnimatePresence>
+              ) : (
+                lastDiff && (
+                  <span
+                    className={`mmr-badge__last-diff ${lastDiff.colorClass}`}
+                  >
+                    {lastDiff.value}
+                  </span>
+                )
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

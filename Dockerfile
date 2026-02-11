@@ -17,7 +17,7 @@ RUN touch -a -m ./src/main.rs
 RUN cargo build --release
 
 # Runtime
-FROM gcr.io/distroless/cc-debian12
+FROM gcr.io/distroless/cc-debian13
 COPY --from=backend-builder /app/target/release/mkworld-overlay /
 COPY --from=frontend-builder /app/dist /dist
 COPY static /static

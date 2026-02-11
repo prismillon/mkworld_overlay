@@ -2,6 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "platformAutomerge": false,
+  "ignoreTests": true,
+  "automergeType": "pr",
   "packageRules": [
     {
       "description": "Automerge non-major updates",

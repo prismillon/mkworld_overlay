@@ -61,6 +61,8 @@ function formatFieldValue(player: Player, field: OverlayField): string {
     return String(parseFloat(v.toFixed(2)));
   if (field === "partnerAvg" && typeof v === "number")
     return String(parseFloat(v.toFixed(2)));
+  if (field === "averageLastTen" && typeof v === "number")
+    return String(parseFloat(v.toFixed(2)));
   if (field === "gainLossLastTen" && typeof v === "number") {
     return v >= 0 ? `+${v}` : `${v}`;
   }

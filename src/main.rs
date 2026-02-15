@@ -20,7 +20,6 @@ struct PlayerQuery {
     game: String,
 }
 
-/// Raw upstream API response from MKCentral
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct UpstreamPlayerData {
@@ -79,10 +78,8 @@ struct PlayerData {
     rank: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     rank_icon_url: Option<String>,
-    /// Average score of partners across all Table events
     #[serde(skip_serializing_if = "Option::is_none")]
     partner_avg: Option<f64>,
-    /// MMR delta from the most recent Table event
     #[serde(skip_serializing_if = "Option::is_none")]
     last_diff: Option<i64>,
 }
@@ -181,7 +178,6 @@ impl AppState {
             .await
             .map_err(|e| format!("JSON parse error: {e}"))?;
 
-        // Compute partner_avg from all partner scores across Table events
         let table_events: Vec<&MmrChange> = upstream
             .mmr_changes
             .iter()
@@ -201,7 +197,6 @@ impl AppState {
             }
         };
 
-        // Compute last_diff from the most recent Table event's mmrDelta
         let last_diff = table_events.first().and_then(|c| c.mmr_delta);
 
         let mut player_data = PlayerData {

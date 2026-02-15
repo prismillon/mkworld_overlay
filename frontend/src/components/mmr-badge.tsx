@@ -10,71 +10,110 @@ interface MmrBadgeProps {
   rankIconUrl?: string;
   isLoading?: boolean;
   hasError?: boolean;
-  /** When set, enables cycling mode through selected extra fields */
   fields?: OverlayField[];
-  /** Full player data, needed for cycling mode */
   player?: Player | null;
-  /** Current game mode — used to display source label */
   game?: GameMode;
-  /** 12p player data for "both" mode */
   player12p?: Player | null;
-  /** 12p MMR for "both" mode */
   mmr12p?: number | null;
-  /** 12p rank icon for "both" mode */
   rankIconUrl12p?: string;
 }
 
-/** Duration each stat is shown before transitioning (ms) */
-const CYCLE_DISPLAY_MS = 4_000;
-/** Scroll animation duration (seconds) */
+const CYCLE_MS = 4_000;
 const SCROLL_DURATION = 0.8;
 
-interface StatSlide {
-  label: string;
+interface Slide {
+  key: string;
+  label?: string;
   value: string;
-  isMmr: boolean;
-  field?: OverlayField;
-  countryCode?: string;
-  inlineLabel?: string;
+  extra?: boolean;
   colorClass?: string;
+  countryCode?: string;
   source?: string;
   rankIconUrl?: string;
+  lastDiff?: string;
+  lastDiffColor?: string;
 }
 
-/** Fields that display inline with a short label prefix */
-const INLINE_LABELS: Partial<Record<OverlayField, string>> = {
-  gainLossLastTen: "Last 10:",
-  overallRank: "Rank:",
-  averageScore: "Avg:",
-  partnerAvg: "P. Avg:",
-};
-
-function formatFieldValue(player: Player, field: OverlayField): string {
+function formatField(player: Player, field: OverlayField): string {
   let v = player[field];
-  if (field === "maxMmr" && (v === undefined || v === null)) {
-    v = player.mmr;
+  if (field === "maxMmr" && v == null) v = player.mmr;
+  if (v == null) return "N/A";
+
+  if (typeof v === "number") {
+    switch (field) {
+      case "winRate":
+        return `${parseFloat((v * 100).toFixed(1))}%`;
+      case "averageScore":
+      case "partnerAvg":
+      case "averageLastTen":
+        return String(parseFloat(v.toFixed(2)));
+      case "gainLossLastTen":
+      case "lastDiff":
+        return v >= 0 ? `+${v}` : `${v}`;
+      case "overallRank":
+        return `#${v}`;
+    }
   }
-  if (v === undefined || v === null) return "N/A";
-  if (field === "winRate" && typeof v === "number")
-    return `${parseFloat((v * 100).toFixed(1))}%`;
-  if (field === "averageScore" && typeof v === "number")
-    return String(parseFloat(v.toFixed(2)));
-  if (field === "partnerAvg" && typeof v === "number")
-    return String(parseFloat(v.toFixed(2)));
-  if (field === "averageLastTen" && typeof v === "number")
-    return String(parseFloat(v.toFixed(2)));
-  if (field === "gainLossLastTen" && typeof v === "number") {
-    return v >= 0 ? `+${v}` : `${v}`;
-  }
-  if (field === "lastDiff" && typeof v === "number") {
-    return v >= 0 ? `+${v}` : `${v}`;
-  }
-  if (field === "overallRank" && v !== undefined) return `#${v}`;
+  if (field === "overallRank") return `#${v}`;
   return String(v);
 }
 
+const SHORT_LABELS: Partial<Record<OverlayField, string>> = {
+  overallRank: "Rank",
+  averageScore: "Avg",
+  partnerAvg: "P. Avg",
+  eventsPlayed: "Events",
+};
+
 function fieldLabel(key: OverlayField): string {
-  return OVERLAY_FIELDS.find((f) => f.key === key)?.label ?? key;
+  return (
+    SHORT_LABELS[key] ?? OVERLAY_FIELDS.find((f) => f.key === key)?.label ?? key
+  );
+}
+
+function diffColor(v: number): string {
+  return v >= 0 ? "gain-positive" : "gain-negative";
+}
+
+function buildSlides(
+  p: Player,
+  pMmr: number | null,
+  src: string,
+  pRankIcon?: string,
+  cycleFields: OverlayField[] = [],
+  showLastDiff = false,
+): Slide[] {
+  const mmrValue = pMmr != null ? Math.round(pMmr).toString() : "N/A";
+  const diff =
+    showLastDiff && typeof p.lastDiff === "number" ? p.lastDiff : null;
+
+  const mmrSlide: Slide = {
+    key: `mmr-${src}`,
+    value: mmrValue,
+    source: src,
+    rankIconUrl: pRankIcon,
+    lastDiff: diff != null ? (diff >= 0 ? `+${diff}` : `${diff}`) : undefined,
+    lastDiffColor: diff != null ? diffColor(diff) : undefined,
+  };
+
+  const extras: Slide[] = cycleFields.map((f) => {
+    const raw = p[f];
+    return {
+      key: `${f}-${src}`,
+      label: f === "name" ? undefined : fieldLabel(f),
+      value: formatField(p, f),
+      extra: true,
+      colorClass:
+        (f === "gainLossLastTen" || f === "lastDiff") && typeof raw === "number"
+          ? diffColor(raw)
+          : undefined,
+      countryCode: f === "name" ? p.countryCode : undefined,
+      source: src,
+      rankIconUrl: pRankIcon,
+    };
+  });
+
+  return [mmrSlide, ...extras];
 }
 
 export function MmrBadge({
@@ -89,208 +128,143 @@ export function MmrBadge({
   mmr12p,
   rankIconUrl12p,
 }: MmrBadgeProps) {
-  const displayValue =
-    isLoading && mmr === null
-      ? "Loading..."
-      : hasError && mmr === null
-        ? "Error"
-        : mmr !== null
-          ? Math.round(mmr).toString()
-          : "N/A";
-
   const isBoth = game === "both";
-  /** Label shown for the current game mode source */
-  const sourceLabel =
-    game === "12p" ? "12p" : game === "both" ? undefined : "24p";
+  const showLastDiff = !!fields?.includes("lastDiff");
+  const cycleFields = useMemo(
+    () => fields?.filter((f) => f !== "lastDiff") ?? [],
+    [fields],
+  );
 
-  // --- cycling mode ---
-  // Enable cycling when extra fields (excluding lastDiff) are selected, OR when "both" mode is active
-  const lastDiffSelected = !!(fields && fields.includes("lastDiff"));
-  const cycleFields = fields?.filter((f) => f !== "lastDiff");
-  const hasExtraFields = !!(cycleFields && cycleFields.length > 0);
-  const cyclingEnabled =
-    !!(hasExtraFields && player) || !!(isBoth && player && player12p);
-
-  function buildSlidesForPlayer(
-    p: Player,
-    pMmr: number | null,
-    src: string,
-    pRankIconUrl?: string,
-  ): StatSlide[] {
-    const mmrSlide: StatSlide = {
-      label: "MMR",
-      value: pMmr !== null ? Math.round(pMmr).toString() : "N/A",
-      isMmr: true,
-      source: src,
-      rankIconUrl: pRankIconUrl,
-    };
-    const extras: StatSlide[] = (cycleFields ?? []).map((f) => {
-      const raw = p[f];
-      let colorClass: string | undefined;
-      if (f === "gainLossLastTen" && typeof raw === "number") {
-        colorClass = raw >= 0 ? "gain-positive" : "gain-negative";
-      }
-      return {
-        label: fieldLabel(f),
-        value: formatFieldValue(p, f),
-        isMmr: false,
-        field: f,
-        countryCode: f === "name" ? p.countryCode : undefined,
-        inlineLabel: INLINE_LABELS[f],
-        colorClass,
-        source: src,
-        rankIconUrl: pRankIconUrl,
-      };
-    });
-    return [mmrSlide, ...extras];
-  }
-
-  const slides: StatSlide[] = useMemo(() => {
-    if (!cyclingEnabled || !player) return [];
+  const slides = useMemo(() => {
+    if (!player) return [];
 
     if (isBoth && player12p) {
-      if (hasExtraFields) {
-        const slides24p = buildSlidesForPlayer(player, mmr, "24p", rankIconUrl);
-        const slides12p = buildSlidesForPlayer(
-          player12p,
-          mmr12p ?? null,
-          "12p",
-          rankIconUrl12p,
-        );
-        return [...slides24p, ...slides12p];
-      }
-      // Both mode, MMR-only: just cycle the two MMR slides
-      return [
-        {
-          label: "MMR",
-          value: mmr !== null ? Math.round(mmr).toString() : "N/A",
-          isMmr: true,
-          source: "24p",
-          rankIconUrl,
-        },
-        {
-          label: "MMR",
-          value: mmr12p != null ? Math.round(mmr12p).toString() : "N/A",
-          isMmr: true,
-          source: "12p",
-          rankIconUrl: rankIconUrl12p,
-        },
-      ];
+      const slides24p = buildSlides(
+        player,
+        mmr,
+        "24p",
+        rankIconUrl,
+        cycleFields,
+        showLastDiff,
+      );
+      const slides12p = buildSlides(
+        player12p,
+        mmr12p ?? null,
+        "12p",
+        rankIconUrl12p,
+        cycleFields.filter((f) => f !== "name"),
+        showLastDiff,
+      );
+      return [...slides24p, ...slides12p];
     }
 
     const src = game === "12p" ? "12p" : "24p";
-    return buildSlidesForPlayer(player, mmr, src, rankIconUrl);
+    return buildSlides(
+      player,
+      mmr,
+      src,
+      rankIconUrl,
+      cycleFields,
+      showLastDiff,
+    );
   }, [
-    cyclingEnabled,
     player,
     mmr,
-    fields,
     isBoth,
     player12p,
     mmr12p,
     game,
     rankIconUrl,
     rankIconUrl12p,
-    hasExtraFields,
+    cycleFields,
+    showLastDiff,
   ]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const cycling = slides.length > 1;
+  const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    if (!cyclingEnabled || slides.length <= 1) return;
+    if (!cycling) return;
+    const t = setInterval(
+      () => setIdx((i) => (i + 1) % slides.length),
+      CYCLE_MS,
+    );
+    return () => clearInterval(t);
+  }, [cycling, slides.length]);
 
-    const timer = setInterval(() => {
-      setActiveIndex((i) => (i + 1) % slides.length);
-    }, CYCLE_DISPLAY_MS);
+  useEffect(() => setIdx(0), [slides.length]);
 
-    return () => clearInterval(timer);
-  }, [cyclingEnabled, slides.length]);
+  const staticValue =
+    isLoading && mmr === null
+      ? "Loading..."
+      : hasError && mmr === null
+        ? "Error"
+        : mmr != null
+          ? Math.round(mmr).toString()
+          : "N/A";
 
-  // Reset index when slides change
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [slides.length]);
-
-  // --- Compute lastDiff display value for simple & cycling modes ---
-  function formatLastDiff(
-    p: Player | null | undefined,
-  ): { value: string; colorClass: string } | null {
-    if (!lastDiffSelected || !p) return null;
-    const raw = p.lastDiff;
-    if (raw === undefined || raw === null) return null;
-    const value =
-      typeof raw === "number" ? (raw >= 0 ? `+${raw}` : `${raw}`) : String(raw);
-    const colorClass =
-      typeof raw === "number"
-        ? raw >= 0
-          ? "gain-positive"
-          : "gain-negative"
-        : "";
-    return { value, colorClass };
-  }
-
-  // --- shared layout for both modes ---
-  const current = cyclingEnabled ? (slides[activeIndex] ?? slides[0]) : null;
-  const currentRankIcon = current?.rankIconUrl ?? rankIconUrl;
-  const lastDiff = formatLastDiff(player);
-
-  // Resolve the source label for cycling mode (animated) or static mode (fixed)
-  const currentSource = cyclingEnabled ? current?.source : sourceLabel;
+  const current = cycling ? (slides[idx] ?? slides[0]) : null;
+  const icon = current?.rankIconUrl ?? rankIconUrl;
+  const sourceLabel = cycling
+    ? current?.source
+    : game === "12p"
+      ? "12p"
+      : game === "both"
+        ? undefined
+        : "24p";
 
   return (
     <div
       className={`mmr-badge ${hasError && mmr === null ? "mmr-badge--error" : ""}`}
     >
-      <div className="mmr-badge__content">
-        <div
-          className={`mmr-badge__value ${isLoading && mmr === null ? "mmr-badge__value--loading" : ""}`}
-        >
-          {/* Icon — same position in both modes */}
-          {cyclingEnabled && isBoth ? (
-            <AnimatePresence mode="popLayout">
-              {currentRankIcon && (
-                <motion.img
-                  key={currentRankIcon}
-                  src={currentRankIcon}
-                  alt="Rank"
-                  className="mmr-badge__icon"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-              )}
-            </AnimatePresence>
-          ) : (
-            rankIconUrl && (
-              <img src={rankIconUrl} alt="Rank" className="mmr-badge__icon" />
-            )
-          )}
+      <div className="mmr-badge__row">
+        {cycling && isBoth ? (
+          <AnimatePresence mode="popLayout">
+            {icon && (
+              <motion.img
+                key={icon}
+                src={icon}
+                alt="Rank"
+                className="mmr-badge__icon"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            )}
+          </AnimatePresence>
+        ) : (
+          rankIconUrl && (
+            <img src={rankIconUrl} alt="Rank" className="mmr-badge__icon" />
+          )
+        )}
 
-          {/* Digits area — same div in both modes */}
-          <div
-            className={`mmr-badge__digits ${cyclingEnabled ? "mmr-badge__digits--cycling" : ""}`}
-          >
-            {cyclingEnabled && current ? (
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={activeIndex}
-                  initial={{ y: -60, opacity: 0, filter: "blur(4px)" }}
-                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                  exit={{ y: 60, opacity: 0, filter: "blur(4px)" }}
-                  transition={{
-                    duration: SCROLL_DURATION,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="mmr-badge__cycle-slide"
-                >
-                  {current.isMmr ? (
-                    <span className="mmr-badge__cycle-value">
+        <div
+          className={`mmr-badge__value ${cycling ? "mmr-badge__value--cycling" : ""}`}
+        >
+          {cycling && current ? (
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={idx}
+                className="mmr-badge__slide"
+                initial={{ y: -60, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: 60, opacity: 0, filter: "blur(4px)" }}
+                transition={{
+                  duration: SCROLL_DURATION,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                {current.extra ? (
+                  <FitText className="mmr-badge__slide-fit">
+                    {current.label && (
+                      <span className="mmr-badge__label">{current.label}:</span>
+                    )}
+                    <span
+                      className={`mmr-badge__text mmr-badge__text--extra ${current.colorClass ?? ""}`}
+                    >
                       {current.value}
-                    </span>
-                  ) : current.field === "name" ? (
-                    <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-name">
-                      {current.value}
+                      {current.countryCode && " "}
                       {current.countryCode && (
                         <ReactCountryFlag
                           countryCode={current.countryCode}
@@ -298,97 +272,65 @@ export function MmrBadge({
                           className="mmr-badge__flag"
                         />
                       )}
-                    </FitText>
-                  ) : current.inlineLabel ? (
-                    <FitText className="mmr-badge__cycle-value mmr-badge__cycle-value--extra mmr-badge__cycle-inline">
-                      <span className="mmr-badge__cycle-inline-label">
-                        {current.inlineLabel}
-                      </span>{" "}
-                      <span className={current.colorClass ?? ""}>
-                        {current.value}
-                      </span>
-                    </FitText>
-                  ) : (
-                    <FitText
-                      className="mmr-badge__cycle-value mmr-badge__cycle-value--extra"
-                      fitHeight
-                      padding={0.75}
-                    >
-                      <div className="mmr-badge__cycle-stat">
-                        <span className="mmr-badge__cycle-label">
-                          {current.label}
-                        </span>
-                        <span
-                          className={`mmr-badge__cycle-stat-value ${current.colorClass ?? ""}`}
-                        >
-                          {current.value}
-                        </span>
-                      </div>
-                    </FitText>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              <span>{displayValue}</span>
-            )}
-          </div>
+                    </span>
+                  </FitText>
+                ) : (
+                  <span className="mmr-badge__text">{current.value}</span>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <span className="mmr-badge__text">{staticValue}</span>
+          )}
+        </div>
 
-          {/* Source column — same position in both modes */}
-          {currentSource && (
-            <div className="mmr-badge__source-col">
-              {cyclingEnabled ? (
+        {(sourceLabel || (current?.lastDiff && showLastDiff)) && (
+          <div className="mmr-badge__source">
+            {sourceLabel &&
+              (cycling ? (
                 <AnimatePresence mode="popLayout">
                   <motion.span
-                    key={currentSource}
-                    className="mmr-badge__source-label"
+                    key={sourceLabel}
+                    className="mmr-badge__source-text"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {currentSource}
+                    {sourceLabel}
                   </motion.span>
                 </AnimatePresence>
               ) : (
-                <span className="mmr-badge__source-label">{currentSource}</span>
+                <span className="mmr-badge__source-text">{sourceLabel}</span>
+              ))}
+            {showLastDiff && cycling && current?.lastDiff && (
+              <AnimatePresence mode="popLayout">
+                <motion.span
+                  key={`diff-${current.key}`}
+                  className={`mmr-badge__diff ${current.lastDiffColor ?? ""}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {current.lastDiff}
+                </motion.span>
+              </AnimatePresence>
+            )}
+            {showLastDiff &&
+              !cycling &&
+              player &&
+              typeof player.lastDiff === "number" && (
+                <span
+                  className={`mmr-badge__diff ${diffColor(player.lastDiff)}`}
+                >
+                  {player.lastDiff >= 0
+                    ? `+${player.lastDiff}`
+                    : player.lastDiff}
+                </span>
               )}
-
-              {/* Last diff — static in simple mode, animated in cycling */}
-              {cyclingEnabled ? (
-                <AnimatePresence mode="wait">
-                  {lastDiffSelected &&
-                    current?.isMmr &&
-                    (() => {
-                      const diffPlayer =
-                        isBoth && current.source === "12p" ? player12p : player;
-                      const diff = formatLastDiff(diffPlayer);
-                      if (!diff) return null;
-                      return (
-                        <motion.span
-                          key={`diff-${current.source}`}
-                          className={`mmr-badge__last-diff ${diff.colorClass}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {diff.value}
-                        </motion.span>
-                      );
-                    })()}
-                </AnimatePresence>
-              ) : (
-                lastDiff && (
-                  <span
-                    className={`mmr-badge__last-diff ${lastDiff.colorClass}`}
-                  >
-                    {lastDiff.value}
-                  </span>
-                )
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

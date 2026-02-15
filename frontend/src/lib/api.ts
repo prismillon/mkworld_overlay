@@ -28,7 +28,6 @@ function getFromCache(key: string): Player | null {
 function setCache(key: string, data: Player): void {
   cache.set(key, { data, timestamp: Date.now() });
 
-  // Cleanup old entries
   const now = Date.now();
   const maxAge = CACHE.TIMEOUT_MS * CACHE.CLEANUP_MULTIPLIER;
 

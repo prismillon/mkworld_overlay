@@ -35,7 +35,6 @@ export function Overlay({ playerName, game, fields: _fields }: OverlayProps) {
 
   useInterval(refresh, OVERLAY.AUTO_REFRESH_MS);
 
-  // Core (MMR + rank) always shown; extra fields cycle when selected
   return (
     <div className="overlay">
       <MmrBadge

@@ -1,7 +1,7 @@
 {
   "name": "mkworld-overlay",
   "version": "1.0.0",
-  "description": "MK World MMR Overlay - Modern Responsive Web App",
+  "description": "MK World MMR Overlay",
   "scripts": {
     "start": "cargo run",
     "build": "cd frontend && bun run build && cd .. && cargo build --release",

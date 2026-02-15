@@ -19,10 +19,6 @@ export const GAME_MODES = {
   OPTIONS: ["24p", "12p", "both"],
 } as const;
 
-/**
- * Toggleable overlay fields.
- * Core (MMR + rank icon) is always shown and not listed here.
- */
 export const OVERLAY_FIELDS: OverlayFieldOption[] = [
   { key: "name", label: "Name" },
   { key: "maxMmr", label: "Peak" },

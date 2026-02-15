@@ -3,7 +3,6 @@ const ENGLISH_STEPS = [
   'Click "Copy Overlay URL" button',
   "In OBS, add a Browser Source",
   "Paste the URL in the URL field",
-  "Set Width: 400, Height: 100",
   'Check "Shutdown source when not visible"',
   'Check "Refresh browser when scene becomes active"',
 ];
@@ -13,7 +12,6 @@ const JAPANESE_STEPS = [
   "「Copy Overlay URL」ボタンをクリック",
   "OBSでブラウザソースを追加",
   "完全なURLをURLフィールドにペースト",
-  "幅: 400、高さ: 100に設定",
   "「表示されていない時にソースをシャットダウン」をチェック",
   "「シーンがアクティブになった時にブラウザを更新」をチェック",
 ];

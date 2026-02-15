@@ -1,38 +1,13 @@
 import { useRef, useLayoutEffect, useState, type ReactNode } from "react";
 
 interface FitTextProps {
-  /** The content to render — will be scaled to fit its parent */
   children: ReactNode;
-  /** Extra class names on the wrapper span */
   className?: string;
-  /**
-   * Minimum scale factor before we give up and clip.
-   * Default: 0.35 (35 % of original size)
-   */
   minScale?: number;
-  /**
-   * Safety margin multiplied against the computed ratio so that visual
-   * overflow from text-shadow, letter-spacing, etc. doesn't clip.
-   * 0.92 means the text will fill ~92 % of the available width.
-   * Default: 0.92
-   */
   padding?: number;
-  /**
-   * Also constrain by height (useful for stacked label + value layouts).
-   * Default: false
-   */
   fitHeight?: boolean;
 }
 
-/**
- * Renders `children` at their natural size, then measures whether they fit
- * the parent container. A uniform `transform: scale()` is applied so the
- * text fills as much space as possible (minus a small safety margin for
- * visual effects like text-shadow and letter-spacing).
- *
- * When `fitHeight` is true, both width and height are considered and the
- * smaller ratio wins.
- */
 export function FitText({
   children,
   className,
@@ -42,15 +17,14 @@ export function FitText({
 }: FitTextProps) {
   const outerRef = useRef<HTMLSpanElement>(null);
   const innerRef = useRef<HTMLSpanElement>(null);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     const outer = outerRef.current;
     const inner = innerRef.current;
     if (!outer || !inner) return;
 
-    // Reset scale so we measure at natural size
-    setScale(1);
+    inner.style.transform = "none";
 
     const measure = () => {
       const containerWidth = outer.clientWidth;
@@ -67,13 +41,15 @@ export function FitText({
           }
         }
 
-        setScale(Math.max(ratio * padding, minScale));
+        const s = Math.min(Math.max(ratio * padding, minScale), 1);
+        setScale(s);
+        inner.style.transform = s !== 1 ? `scale(${s})` : "none";
       } else {
         setScale(1);
+        inner.style.transform = "none";
       }
     };
 
-    // Use rAF to measure after DOM paint
     const id = requestAnimationFrame(measure);
     return () => cancelAnimationFrame(id);
   }, [children, minScale, padding, fitHeight]);
@@ -84,7 +60,9 @@ export function FitText({
         ref={innerRef}
         className="fit-text__inner"
         style={{
-          transform: scale !== 1 ? `scale(${scale})` : undefined,
+          visibility: scale === null ? "hidden" : "visible",
+          transform:
+            scale !== null && scale !== 1 ? `scale(${scale})` : undefined,
         }}
       >
         {children}

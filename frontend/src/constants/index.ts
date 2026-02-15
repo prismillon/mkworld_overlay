@@ -1,4 +1,4 @@
-import type { OverlayFieldOption } from "../types";
+import type { OverlayField } from "../types";
 
 export const API = {
   BASE_URL: "/api",
@@ -19,17 +19,17 @@ export const GAME_MODES = {
   OPTIONS: ["24p", "12p", "both"],
 } as const;
 
-export const OVERLAY_FIELDS: OverlayFieldOption[] = [
-  { key: "name", label: "Name" },
-  { key: "maxMmr", label: "Peak" },
-  { key: "overallRank", label: "Overall Rank" },
-  { key: "eventsPlayed", label: "Events Played" },
-  { key: "winRate", label: "Win Rate" },
-  { key: "winLossLastTen", label: "W/L Last 10" },
-  { key: "gainLossLastTen", label: "+/- Last 10" },
-  { key: "largestGain", label: "Largest Gain" },
-  { key: "averageScore", label: "Avg Score" },
-  { key: "averageLastTen", label: "Avg Last 10" },
-  { key: "partnerAvg", label: "Partner Avg" },
-  { key: "lastDiff", label: "Last Diff" },
-] as const;
+export const OVERLAY_FIELDS: OverlayField[] = [
+  "name",
+  "maxMmr",
+  "overallRank",
+  "eventsPlayed",
+  "winRate",
+  "winLossLastTen",
+  "gainLossLastTen",
+  "largestGain",
+  "averageScore",
+  "averageLastTen",
+  "partnerAvg",
+  "lastDiff",
+];

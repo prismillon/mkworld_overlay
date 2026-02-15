@@ -32,11 +32,6 @@ export type OverlayField =
   | "partnerAvg"
   | "lastDiff";
 
-export interface OverlayFieldOption {
-  readonly key: OverlayField;
-  readonly label: string;
-}
-
 export type GameMode = "12p" | "24p" | "both";
 
 export interface AsyncState<T> {

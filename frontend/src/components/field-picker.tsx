@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { OverlayField } from "../types";
 import { OVERLAY_FIELDS } from "../constants";
 import { Checkbox } from "./ui";
@@ -8,6 +9,8 @@ interface FieldPickerProps {
 }
 
 export function FieldPicker({ selected, onChange }: FieldPickerProps) {
+  const { t } = useTranslation();
+
   const toggle = (key: OverlayField) => {
     if (selected.includes(key)) {
       onChange(selected.filter((k) => k !== key));
@@ -18,15 +21,17 @@ export function FieldPicker({ selected, onChange }: FieldPickerProps) {
 
   return (
     <div className="field-picker">
-      <h3 className="field-picker__title">Extra options</h3>
+      <h3 className="field-picker__title">{t("fields.title")}</h3>
       <div className="field-picker__grid">
-        {OVERLAY_FIELDS.map((field) => (
-          <label key={field.key} className="field-picker__item">
+        {OVERLAY_FIELDS.map((key) => (
+          <label key={key} className="field-picker__item">
             <Checkbox
-              checked={selected.includes(field.key)}
-              onChange={() => toggle(field.key)}
+              checked={selected.includes(key)}
+              onChange={() => toggle(key)}
             />
-            <span className="field-picker__item-label">{field.label}</span>
+            <span className="field-picker__item-label">
+              {t(`fields.${key}`)}
+            </span>
           </label>
         ))}
       </div>

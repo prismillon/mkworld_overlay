@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { GameMode } from "../types";
 import { usePlayer } from "../hooks";
-import { SearchForm, PlayerCard, Instructions } from "../components";
+import {
+  SearchForm,
+  PlayerCard,
+  Instructions,
+  LanguageSwitcher,
+} from "../components";
 import { GAME_MODES } from "../constants";
 
 export function Home() {
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://storage.ko-fi.com/cdn/scripts/overlay-widget.js";
+    script.async = true;
+    script.onload = () => {
+      (window as any).kofiWidgetOverlay?.draw("prsmxd", {
+        type: "floating-chat",
+        "floating-chat.donateButton.text": "Support me",
+        "floating-chat.donateButton.background-color": "#ffffff",
+        "floating-chat.donateButton.text-color": "#323842",
+      });
+    };
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const [playerName, setPlayerName] = useState("");
   const [game, setGame] = useState<GameMode>(GAME_MODES.DEFAULT);
   const [submittedName, setSubmittedName] = useState("");
@@ -40,12 +66,18 @@ export function Home() {
     }
   };
 
+  const howItWorksSteps = t("howItWorks.steps", { returnObjects: true }) as {
+    title: string;
+    description: string;
+  }[];
+
   return (
     <div className="home">
       <section className="hero">
         <div className="hero__content">
           <header className="hero__header">
-            <h1>MK World MMR Overlay</h1>
+            <h1>{t("hero.title")}</h1>
+            <LanguageSwitcher />
           </header>
 
           <SearchForm
@@ -77,23 +109,15 @@ export function Home() {
       {!primary.data && (
         <section className="how-it-works">
           <div className="how-it-works__content">
-            <h2 className="how-it-works__title">How It Works</h2>
+            <h2 className="how-it-works__title">{t("howItWorks.title")}</h2>
             <div className="how-it-works__steps">
-              <div className="how-it-works__step">
-                <div className="how-it-works__step-number">1</div>
-                <h3>Search</h3>
-                <p>Enter your MK World player name</p>
-              </div>
-              <div className="how-it-works__step">
-                <div className="how-it-works__step-number">2</div>
-                <h3>Customize</h3>
-                <p>Pick which stats to show on your overlay</p>
-              </div>
-              <div className="how-it-works__step">
-                <div className="how-it-works__step-number">3</div>
-                <h3>Copy URL</h3>
-                <p>Add the URL as a Browser Source in OBS</p>
-              </div>
+              {howItWorksSteps.map((step, i) => (
+                <div key={i} className="how-it-works__step">
+                  <div className="how-it-works__step-number">{i + 1}</div>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -102,7 +126,7 @@ export function Home() {
       <Instructions />
 
       <footer className="footer">
-        <p>MK World MMR Overlay</p>
+        <p>{t("footer.text")}</p>
       </footer>
     </div>
   );

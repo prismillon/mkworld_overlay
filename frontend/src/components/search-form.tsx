@@ -1,4 +1,5 @@
 import type { SubmitEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { GameMode } from "../types";
 import { Button, Input } from "./ui";
 import { GAME_MODES } from "../constants";
@@ -20,6 +21,8 @@ export function SearchForm({
   onGameChange,
   onSubmit,
 }: SearchFormProps) {
+  const { t } = useTranslation();
+
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (value.trim()) onSubmit();
@@ -32,7 +35,7 @@ export function SearchForm({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Enter player name..."
+          placeholder={t("search.placeholder")}
           className="search-form__input"
         />
         <Button
@@ -41,7 +44,7 @@ export function SearchForm({
           isLoading={isLoading}
           className="search-form__button"
         >
-          Get MMR
+          {t("search.button")}
         </Button>
       </div>
       <div className="search-form__game-toggle">
@@ -54,7 +57,7 @@ export function SearchForm({
               checked={game === mode}
               onChange={() => onGameChange(mode as GameMode)}
             />
-            <span>{mode === "both" ? "Both" : mode}</span>
+            <span>{mode === "both" ? t("search.both") : mode}</span>
           </label>
         ))}
       </div>

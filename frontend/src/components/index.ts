@@ -14,6 +14,7 @@ export {
 export { MmrBadge } from "./mmr-badge";
 export { PlayerCard } from "./player-card";
 export { SearchForm } from "./search-form";
+export { LanguageSwitcher } from "./language-switcher";
 export { Instructions } from "./instructions";
 export { FieldPicker } from "./field-picker";
 export { FitText } from "./fit-text";

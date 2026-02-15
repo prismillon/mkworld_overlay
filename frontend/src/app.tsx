@@ -16,7 +16,7 @@ function getUrlParams(): {
         ? "both"
         : GAME_MODES.DEFAULT;
 
-  const validKeys = new Set<string>(OVERLAY_FIELDS.map((f) => f.key));
+  const validKeys = new Set<string>(OVERLAY_FIELDS);
   const fieldsParam = params.get("fields");
   const fields = fieldsParam
     ? (fieldsParam.split(",").filter((k) => validKeys.has(k)) as OverlayField[])

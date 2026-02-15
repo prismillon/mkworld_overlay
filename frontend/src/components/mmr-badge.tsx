@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import ReactCountryFlag from "react-country-flag";
 import type { Player, OverlayField, GameMode } from "../types";
-import { OVERLAY_FIELDS } from "../constants";
 import { FitText } from "./fit-text";
 
 interface MmrBadgeProps {
@@ -58,20 +57,23 @@ function formatField(player: Player, field: OverlayField): string {
   return String(v);
 }
 
-const SHORT_LABELS: Partial<Record<OverlayField, string>> = {
+const FIELD_LABELS: Record<OverlayField, string> = {
+  name: "Name",
+  maxMmr: "Peak",
   overallRank: "Rank",
-  averageScore: "Avg",
-  partnerAvg: "P. Avg",
   eventsPlayed: "Events",
+  winRate: "Win Rate",
   winLossLastTen: "W/L (10)",
   gainLossLastTen: "+/- (10)",
+  largestGain: "Lg. Gain",
+  averageScore: "Avg",
   averageLastTen: "Avg (10)",
+  partnerAvg: "P. Avg",
+  lastDiff: "Last Diff",
 };
 
 function fieldLabel(key: OverlayField): string {
-  return (
-    SHORT_LABELS[key] ?? OVERLAY_FIELDS.find((f) => f.key === key)?.label ?? key
-  );
+  return FIELD_LABELS[key] ?? key;
 }
 
 function diffColor(v: number): string {

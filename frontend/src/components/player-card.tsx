@@ -1,9 +1,10 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Player, GameMode, OverlayField } from "../types";
 import { useClipboard } from "../hooks";
 import { Button, Card, CardHeader, CardContent, CardFooter } from "./ui";
 import { MmrBadge } from "./mmr-badge";
 import { FieldPicker } from "./field-picker";
-import { useState } from "react";
 
 interface PlayerCardProps {
   name: string;
@@ -13,6 +14,7 @@ interface PlayerCardProps {
 }
 
 export function PlayerCard({ name, player, game, player12p }: PlayerCardProps) {
+  const { t } = useTranslation();
   const { copied, copy } = useClipboard();
   const [fields, setFields] = useState<OverlayField[]>([]);
 
@@ -50,7 +52,7 @@ export function PlayerCard({ name, player, game, player12p }: PlayerCardProps) {
 
       <CardFooter>
         <Button onClick={handleCopy} className="player-card__copy-btn">
-          {copied ? "✓ Copied!" : "Copy Overlay URL"}
+          {copied ? t("playerCard.copied") : t("playerCard.copy")}
         </Button>
       </CardFooter>
     </Card>

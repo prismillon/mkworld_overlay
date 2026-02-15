@@ -1,0 +1,61 @@
+{
+  "hero": {
+    "title": "MK World MMR Overlay"
+  },
+  "search": {
+    "placeholder": "Nombre del jugador...",
+    "button": "Obtener MMR",
+    "both": "Ambos"
+  },
+  "howItWorks": {
+    "title": "Cómo funciona",
+    "steps": [
+      {
+        "title": "Buscar",
+        "description": "Ingresa tu nombre de jugador de MK World"
+      },
+      {
+        "title": "Personalizar",
+        "description": "Elige qué estadísticas mostrar en tu overlay"
+      },
+      {
+        "title": "Copiar URL",
+        "description": "Añade la URL como fuente de navegador en OBS"
+      }
+    ]
+  },
+  "instructions": {
+    "title": "Instrucciones de configuración",
+    "cardTitle": "Cómo usar este overlay en OBS:",
+    "steps": [
+      "Ingresa tu nombre de jugador arriba y haz clic en \"Obtener MMR\"",
+      "Haz clic en el botón \"Copiar URL del overlay\"",
+      "En OBS, añade una fuente de navegador",
+      "Pega la URL en el campo URL",
+      "Marca \"Apagar fuente cuando no sea visible\"",
+      "Marca \"Actualizar navegador cuando la escena se active\""
+    ]
+  },
+  "fields": {
+    "title": "Opciones adicionales",
+    "name": "Nombre",
+    "maxMmr": "MMR Máximo",
+    "overallRank": "Ranking general",
+    "eventsPlayed": "Eventos jugados",
+    "winRate": "Tasa de victorias",
+    "winLossLastTen": "V/D últimos 10",
+    "gainLossLastTen": "+/- últimos 10",
+    "largestGain": "Mayor ganancia",
+    "averageScore": "Puntuación media",
+    "averageLastTen": "Media últimos 10",
+    "partnerAvg": "Media compañero",
+    "lastDiff": "Última dif."
+  },
+  "playerCard": {
+    "copy": "Copiar URL del overlay",
+    "copied": "✓ ¡Copiado!"
+  },
+  "footer": {
+    "text": "MK World MMR Overlay"
+  }
+}

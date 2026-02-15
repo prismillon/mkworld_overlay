@@ -1,0 +1,61 @@
+{
+  "hero": {
+    "title": "MK World MMR オーバーレイ"
+  },
+  "search": {
+    "placeholder": "プレイヤー名を入力...",
+    "button": "MMR取得",
+    "both": "両方"
+  },
+  "howItWorks": {
+    "title": "使い方",
+    "steps": [
+      {
+        "title": "検索",
+        "description": "MK Worldのプレイヤー名を入力"
+      },
+      {
+        "title": "カスタマイズ",
+        "description": "オーバーレイに表示する統計を選択"
+      },
+      {
+        "title": "URLをコピー",
+        "description": "OBSでブラウザソースとしてURLを追加"
+      }
+    ]
+  },
+  "instructions": {
+    "title": "セットアップ手順",
+    "cardTitle": "OBSでこのオーバーレイを使用する方法：",
+    "steps": [
+      "上にプレイヤー名を入力して「MMR取得」をクリック",
+      "「オーバーレイURLをコピー」ボタンをクリック",
+      "OBSでブラウザソースを追加",
+      "完全なURLをURLフィールドにペースト",
+      "「表示されていない時にソースをシャットダウン」をチェック",
+      "「シーンがアクティブになった時にブラウザを更新」をチェック"
+    ]
+  },
+  "fields": {
+    "title": "追加オプション",
+    "name": "名前",
+    "maxMmr": "最高MMR",
+    "overallRank": "総合ランク",
+    "eventsPlayed": "イベント数",
+    "winRate": "勝率",
+    "winLossLastTen": "勝敗 (10)",
+    "gainLossLastTen": "+/- (10)",
+    "largestGain": "最大獲得",
+    "averageScore": "平均スコア",
+    "averageLastTen": "平均 (10)",
+    "partnerAvg": "パートナー平均",
+    "lastDiff": "前回差分"
+  },
+  "playerCard": {
+    "copy": "オーバーレイURLをコピー",
+    "copied": "✓ コピーしました！"
+  },
+  "footer": {
+    "text": "MK World MMR オーバーレイ"
+  }
+}

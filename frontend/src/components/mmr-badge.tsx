@@ -63,6 +63,9 @@ const SHORT_LABELS: Partial<Record<OverlayField, string>> = {
   averageScore: "Avg",
   partnerAvg: "P. Avg",
   eventsPlayed: "Events",
+  winLossLastTen: "W/L (10)",
+  gainLossLastTen: "+/- (10)",
+  averageLastTen: "Avg (10)",
 };
 
 function fieldLabel(key: OverlayField): string {

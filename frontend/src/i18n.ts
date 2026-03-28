@@ -18,7 +18,7 @@ i18n
     },
     fallbackLng: "en",
     interpolation: { escapeValue: false },
-    initImmediate: false,
+    initAsync: false,
     detection: {
       order: ["navigator", "htmlTag"],
       caches: ["localStorage"],

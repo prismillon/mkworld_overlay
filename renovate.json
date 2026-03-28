@@ -4,6 +4,7 @@
   "platformAutomerge": false,
   "ignoreTests": true,
   "automergeType": "pr",
+  "reviewers": ["prismillon"],
   "packageRules": [
     {
       "description": "Automerge non-major updates",

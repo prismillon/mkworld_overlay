@@ -1,0 +1,72 @@
+name: "PR image build"
+
+on:
+  pull_request:
+    branches:
+      - "main"
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: "pr-image-build-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: "Build image (no push)"
+    # Public repos + self-hosted runners: never run fork PR code on our runners.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, neptune, docker]
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: "app/pr-check:pr-${{ github.event.pull_request.number }}"
+          cache-from: type=gha
+
+      - name: Extract Renovate update table
+        id: renovate
+        if: always() && !cancelled() && (github.actor == 'renovate[bot]' || github.actor == 'renovate')
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          TABLE=$(printf '%s\n' "$BODY" | grep '^|' | grep -v '^|---|' | grep -v '| Package |' || true)
+          CLEAN=$(printf '%s\n' "$TABLE" | sed -E 's/\[([^]]*)\]\([^)]*\)/\1/g; s/^\| //; s/ \|$//; s/ \| / · /g')
+          {
+            echo "table<<EOF"
+            echo "$CLEAN"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send Discord notification
+        if: always() && !cancelled() && (github.actor == 'renovate[bot]' || github.actor == 'renovate')
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          nodetail: true
+          status: ${{ job.status }}
+          title: "${{ github.event.repository.name }} · image build ${{ job.status }} · PR #${{ github.event.pull_request.number }}"
+          description: |
+            **${{ github.event.pull_request.title }}**
+
+            ${{ steps.renovate.outputs.table }}
+
+            **Repository:** `${{ github.repository }}`
+            **Build:** `${{ job.status }}`
+            **Branch:** `${{ github.event.pull_request.head.ref }}`
+          url: ${{ github.event.pull_request.html_url }}
+          color: ${{ job.status == 'success' && '5763719' || (job.status == 'cancelled' && '16776960' || '15158332') }}
+          username: "Renovate · ${{ github.event.repository.name }}"
